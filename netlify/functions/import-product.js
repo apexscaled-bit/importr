@@ -57,14 +57,14 @@ exports.handler = async (event) => {
     const searchQuery = `${p.brand || ""} ${productCategory}`.trim();
 
     // ── Fetch Unsplash images ──
-    async function getUnsplashImages(query, count = 5) {
+    async function getUnsplashImages(query, count = 4) {
       try {
         const resp = await fetch(
-          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`,
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}`,
           { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } }
         );
         const data = await resp.json();
-        return data.results?.map(img => img.urls?.regular) || [];
+        return data.results?.map(img => img.urls?.small) || [];
       } catch {
         return [];
       }
