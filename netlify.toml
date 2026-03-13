@@ -5,6 +5,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[dev]
+  functions = "netlify/functions"
+
 [[redirects]]
   from = "/auth"
   to = "/.netlify/functions/auth"
@@ -20,5 +23,12 @@
   to = "/.netlify/functions/import-product"
   status = 200
 
-[dev]
-  functions = "netlify/functions"
+[[redirects]]
+  from = "/api/billing"
+  to = "/.netlify/functions/billing"
+  status = 200
+
+[[redirects]]
+  from = "/api/usage"
+  to = "/.netlify/functions/usage"
+  status = 200
