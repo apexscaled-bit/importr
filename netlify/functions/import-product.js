@@ -54,33 +54,78 @@ exports.handler = async (event) => {
     }
 
     const p = rfData.product;
+    const amazonCost = p.buybox_winner?.price?.value || p.price?.value || p.prices?.[0]?.value || 0;
+
+    // ── Use Claude AI to generate enhanced store content ──
+    const bulletPoints = p.feature_bullets?.slice(0, 5).join("\n") || p.description || "";
+    const claudePrompt = `You are a Shopify store copywriter. Given this Amazon product, write compelling store content.
+
+Product: ${p.title}
+Brand: ${p.brand || "Unknown"}
+Price: $${amazonCost}
+Features:
+${bulletPoints}
+
+Respond ONLY with a JSON object (no markdown, no backticks) with these exact keys:
+{
+  "storeName": "catchy 2-3 word store name for this product niche",
+  "tagline": "one compelling sentence store tagline",
+  "productTitle": "improved product title (max 80 chars)",
+  "productDescription": "3 paragraphs of compelling HTML product description using <p> tags. Focus on benefits, lifestyle, and value. No bullet points.",
+  "metaDescription": "SEO meta description under 160 chars",
+  "tags": "5-8 relevant comma-separated tags"
+}`;
+
+    const claudeResp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: claudePrompt }],
+      }),
+    });
+
+    const claudeData = await claudeResp.json();
+    let aiContent = {};
+    try {
+      const rawText = claudeData.content?.[0]?.text || "{}";
+      const clean = rawText.replace(/```json|```/g, "").trim();
+      aiContent = JSON.parse(clean);
+    } catch {
+      aiContent = {};
+    }
 
     if (previewOnly) {
-      const cost = p.buybox_winner?.price?.value || p.price?.value || p.prices?.[0]?.value || 0;
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
           amazonProduct: {
-            title: p.title,
+            title: aiContent.productTitle || p.title,
             image: p.main_image?.link || p.images?.[0]?.link || "",
-            amazon_cost: cost,
+            amazon_cost: amazonCost,
             brand: p.brand || "",
             rating: p.rating,
-            tags: [p.brand, ...(p.categories?.slice(0,3).map(c => c.name) || [])].filter(Boolean).join(", "),
+            tags: aiContent.tags || [p.brand, ...(p.categories?.slice(0,3).map(c => c.name) || [])].filter(Boolean).join(", "),
             category: p.categories?.[0]?.name || "General",
+            aiContent,
           }
         }),
       };
     }
 
-    const amazonCost = p.buybox_winner?.price?.value || p.price?.value || p.prices?.[0]?.value || 0;
     const salePrice = price || (amazonCost * 2.5).toFixed(2);
     const compareAtPrice = compareAt || (amazonCost * 3).toFixed(2);
 
-    const bodyHtml = p.feature_bullets
-      ? "<ul>" + p.feature_bullets.map((b) => `<li>${b}</li>`).join("") + "</ul>"
-      : p.description || "";
+    const bodyHtml = aiContent.productDescription ||
+      (p.feature_bullets
+        ? "<ul>" + p.feature_bullets.map((b) => `<li>${b}</li>`).join("") + "</ul>"
+        : p.description || "");
 
     const locResp = await fetch(
       `https://${shop}/admin/api/2024-01/locations.json`,
@@ -91,11 +136,11 @@ exports.handler = async (event) => {
 
     const productPayload = {
       product: {
-        title: title || p.title,
-        body_html: description || bodyHtml,
+        title: aiContent.productTitle || title || p.title,
+        body_html: bodyHtml,
         vendor: p.brand || "",
         product_type: category || p.categories?.[0]?.name || "General",
-        tags: tags || [p.brand, ...(p.categories?.slice(0, 3).map((c) => c.name) || [])]
+        tags: aiContent.tags || tags || [p.brand, ...(p.categories?.slice(0, 3).map((c) => c.name) || [])]
           .filter(Boolean)
           .join(", "),
         variants: [
@@ -108,7 +153,7 @@ exports.handler = async (event) => {
           },
         ],
         images: p.main_image?.link
-          ? [{ src: p.main_image.link }]
+          ? [{ src: p.main_image.link }, ...(p.images?.slice(1, 5).map(img => ({ src: img.link })) || [])]
           : p.images?.slice(0, 5).map((img) => ({ src: img.link })) || [],
       },
     };
@@ -157,6 +202,7 @@ exports.handler = async (event) => {
       headers,
       body: JSON.stringify({
         success: true,
+        aiContent,
         product: {
           id: createdProduct.id,
           title: createdProduct.title,
