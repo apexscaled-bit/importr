@@ -38,48 +38,67 @@ exports.handler = async (event) => {
 
   try {
     const RAINFOREST_KEY = process.env.RAINFOREST_API_KEY;
+    const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY;
     const amazonDomain = domain || "amazon.com";
 
+    // ── Fetch Amazon product ──
     const rfResp = await fetch(
       `https://api.rainforestapi.com/request?api_key=${RAINFOREST_KEY}&type=product&asin=${asin}&amazon_domain=${amazonDomain}`
     );
     const rfData = await rfResp.json();
 
     if (!rfData.product) {
-      return {
-        statusCode: 404,
-        headers,
-        body: JSON.stringify({ error: "Product not found on Amazon" }),
-      };
+      return { statusCode: 404, headers, body: JSON.stringify({ error: "Product not found on Amazon" }) };
     }
 
     const p = rfData.product;
     const amazonCost = p.buybox_winner?.price?.value || p.price?.value || p.prices?.[0]?.value || 0;
+    const productCategory = p.categories?.[0]?.name || category || "product";
+    const searchQuery = `${p.brand || ""} ${productCategory}`.trim();
 
-    // ── Use Claude AI to generate full store content ──
+    // ── Fetch Unsplash images ──
+    async function getUnsplashImages(query, count = 5) {
+      try {
+        const resp = await fetch(
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`,
+          { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } }
+        );
+        const data = await resp.json();
+        return data.results?.map(img => img.urls?.regular) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    const [productImages, heroImages] = await Promise.all([
+      getUnsplashImages(searchQuery, 5),
+      getUnsplashImages(`${productCategory} lifestyle`, 1),
+    ]);
+
+    // ── Claude AI for store content ──
     const bulletPoints = p.feature_bullets?.slice(0, 5).join("\n") || p.description || "";
-    const claudePrompt = `You are a Shopify store builder. Given this Amazon product, create a complete store identity and product content.
+    const claudePrompt = `You are a Shopify store builder. Given this Amazon product, create complete store content.
 
 Product: ${p.title}
 Brand: ${p.brand || "Unknown"}
 Price: $${amazonCost}
-Category: ${p.categories?.[0]?.name || "General"}
+Category: ${productCategory}
 Features:
 ${bulletPoints}
 
-Respond ONLY with a JSON object (no markdown, no backticks) with these exact keys:
+Respond ONLY with a JSON object (no markdown, no backticks):
 {
-  "storeName": "catchy 2-3 word store name for this product niche",
-  "tagline": "one compelling sentence store tagline under 60 chars",
+  "storeName": "catchy 2-3 word store name for this niche",
+  "tagline": "compelling store tagline under 60 chars",
   "heroHeading": "punchy homepage hero heading under 40 chars",
   "heroSubheading": "compelling homepage subheading under 80 chars",
   "heroCta": "call to action button text under 20 chars",
   "productTitle": "improved product title under 80 chars",
-  "productDescription": "3 paragraphs of compelling HTML using <p> tags. Focus on benefits and lifestyle. No bullet points.",
+  "productDescription": "3 paragraphs of compelling HTML using <p> tags. Focus on benefits and lifestyle.",
   "seoTitle": "SEO page title under 60 chars",
   "seoDescription": "SEO meta description under 160 chars",
   "tags": "5-8 relevant comma-separated tags",
-  "accentColor": "a hex color code that fits this product niche e.g. #FF6B35"
+  "accentColor": "hex color that fits this product niche e.g. #FF6B35"
 }`;
 
     const claudeResp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -100,8 +119,7 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
     let ai = {};
     try {
       const rawText = claudeData.content?.[0]?.text || "{}";
-      const clean = rawText.replace(/```json|```/g, "").trim();
-      ai = JSON.parse(clean);
+      ai = JSON.parse(rawText.replace(/```json|```/g, "").trim());
     } catch {
       ai = {};
     }
@@ -113,12 +131,12 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
         body: JSON.stringify({
           amazonProduct: {
             title: ai.productTitle || p.title,
-            image: p.main_image?.link || p.images?.[0]?.link || "",
+            image: productImages[0] || p.main_image?.link || "",
             amazon_cost: amazonCost,
             brand: p.brand || "",
             rating: p.rating,
             tags: ai.tags || "",
-            category: p.categories?.[0]?.name || "General",
+            category: productCategory,
             aiContent: ai,
           }
         }),
@@ -127,13 +145,10 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
 
     const salePrice = price || (amazonCost * 2.5).toFixed(2);
     const compareAtPrice = compareAt || (amazonCost * 3).toFixed(2);
-
     const bodyHtml = ai.productDescription ||
-      (p.feature_bullets
-        ? "<ul>" + p.feature_bullets.map((b) => `<li>${b}</li>`).join("") + "</ul>"
-        : p.description || "");
+      (p.feature_bullets ? "<ul>" + p.feature_bullets.map(b => `<li>${b}</li>`).join("") + "</ul>" : p.description || "");
 
-    // ── Step 1: Get location ──
+    // ── Get location ──
     const locResp = await fetch(
       `https://${shop}/admin/api/2024-01/locations.json`,
       { headers: { "X-Shopify-Access-Token": access_token } }
@@ -141,26 +156,26 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
     const locData = await locResp.json();
     const locationId = locData.locations?.[0]?.id;
 
-    // ── Step 2: Create product ──
+    // ── Create product with Unsplash images ──
+    const imageUrls = productImages.length > 0
+      ? productImages.map(src => ({ src }))
+      : (p.main_image?.link ? [{ src: p.main_image.link }] : []);
+
     const productPayload = {
       product: {
         title: ai.productTitle || title || p.title,
         body_html: bodyHtml,
         vendor: p.brand || "",
-        product_type: category || p.categories?.[0]?.name || "General",
-        tags: ai.tags || tags || [p.brand, ...(p.categories?.slice(0, 3).map((c) => c.name) || [])].filter(Boolean).join(", "),
-        variants: [
-          {
-            price: String(salePrice),
-            compare_at_price: String(compareAtPrice),
-            sku: asin,
-            inventory_management: "shopify",
-            inventory_quantity: 10,
-          },
-        ],
-        images: p.main_image?.link
-          ? [{ src: p.main_image.link }, ...(p.images?.slice(1, 5).map(img => ({ src: img.link })) || [])]
-          : p.images?.slice(0, 5).map((img) => ({ src: img.link })) || [],
+        product_type: productCategory,
+        tags: ai.tags || tags || "",
+        variants: [{
+          price: String(salePrice),
+          compare_at_price: String(compareAtPrice),
+          sku: asin,
+          inventory_management: "shopify",
+          inventory_quantity: 10,
+        }],
+        images: imageUrls,
       },
     };
 
@@ -175,16 +190,12 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
     const createData = await createResp.json();
 
     if (createData.errors) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "Shopify error: " + JSON.stringify(createData.errors) }),
-      };
+      return { statusCode: 400, headers, body: JSON.stringify({ error: "Shopify error: " + JSON.stringify(createData.errors) }) };
     }
 
     const createdProduct = createData.product;
 
-    // ── Step 3: Set inventory ──
+    // ── Set inventory ──
     if (locationId && createdProduct.variants?.[0]?.inventory_item_id) {
       await fetch(`https://${shop}/admin/api/2024-01/inventory_levels/set.json`, {
         method: "POST",
@@ -197,10 +208,9 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
       });
     }
 
-    // ── Step 4: Update store theme settings ──
+    // ── Update theme settings ──
     let themeUpdated = false;
     try {
-      // Get the main published theme
       const themesResp = await fetch(
         `https://${shop}/admin/api/2024-01/themes.json`,
         { headers: { "X-Shopify-Access-Token": access_token } }
@@ -209,7 +219,6 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
       const mainTheme = themesData.themes?.find(t => t.role === "main");
 
       if (mainTheme) {
-        // Get current theme settings
         const settingsResp = await fetch(
           `https://${shop}/admin/api/2024-01/themes/${mainTheme.id}/assets.json?asset[key]=config/settings_data.json`,
           { headers: { "X-Shopify-Access-Token": access_token } }
@@ -217,7 +226,6 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
         const settingsData = await settingsResp.json();
         const currentSettings = JSON.parse(settingsData.asset?.value || "{}");
 
-        // Update hero section and store info
         const updatedSettings = {
           ...currentSettings,
           current: {
@@ -240,29 +248,10 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
             }),
           }
         );
-
         themeUpdated = true;
       }
     } catch (themeErr) {
       console.error("Theme update failed (non-fatal):", themeErr);
-    }
-
-    // ── Step 5: Update store metafields with AI content ──
-    try {
-      await fetch(`https://${shop}/admin/api/2024-01/metafields.json`, {
-        method: "POST",
-        headers: { "X-Shopify-Access-Token": access_token, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          metafield: {
-            namespace: "importr",
-            key: "store_tagline",
-            value: ai.tagline || "",
-            type: "single_line_text_field",
-          }
-        }),
-      });
-    } catch (e) {
-      console.error("Metafield update failed (non-fatal):", e);
     }
 
     return {
@@ -272,13 +261,14 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
         success: true,
         themeUpdated,
         aiContent: ai,
+        heroImage: heroImages[0] || "",
         product: {
           id: createdProduct.id,
           title: createdProduct.title,
           handle: createdProduct.handle,
           admin_url: `https://${shop}/admin/products/${createdProduct.id}`,
           storefront_url: `https://${shop}/products/${createdProduct.handle}`,
-          image: createdProduct.images?.[0]?.src || "",
+          image: createdProduct.images?.[0]?.src || productImages[0] || "",
           price: createdProduct.variants?.[0]?.price,
           amazon_cost: amazonCost,
         },
@@ -287,6 +277,7 @@ Respond ONLY with a JSON object (no markdown, no backticks) with these exact key
           tagline: ai.tagline,
           heroHeading: ai.heroHeading,
           heroSubheading: ai.heroSubheading,
+          heroCta: ai.heroCta,
         }
       }),
     };
