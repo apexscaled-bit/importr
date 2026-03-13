@@ -318,20 +318,27 @@ let token = null;
 
 function init() {
   const params = new URLSearchParams(window.location.search);
-  shop = params.get('shop') || getCookie('shop');
-  token = params.get('token') || null;
+  
+  // Get shop from URL params, sessionStorage, or Shopify admin URL
+  let shopParam = params.get('shop') || sessionStorage.getItem('shop');
+  
+  // If inside Shopify admin iframe, extract shop from parent URL
+  if (!shopParam) {
+    try {
+      const adminMatch = window.location.ancestorOrigins?.[0]?.match(/admin\.shopify\.com\/store\/([^/]+)/);
+      if (adminMatch) shopParam = adminMatch[1] + '.myshopify.com';
+    } catch(e) {}
+  }
 
-  if (shop && token) {
-    showToast('success', '✓', `Connected to ${shop}!`);
-    // Save to sessionStorage so it persists on refresh
+  shop = shopParam;
+  token = params.get('token') || sessionStorage.getItem('token');
+
+  if (shop && params.get('token')) {
     sessionStorage.setItem('shop', shop);
     sessionStorage.setItem('token', token);
     window.history.replaceState({}, '', '/');
+    showToast('success', '✓', `Connected to ${shop}!`);
   }
-
-  // Try sessionStorage if not in URL
-  if (!shop) shop = sessionStorage.getItem('shop');
-  if (!token) token = sessionStorage.getItem('token');
 
   if (shop && token) {
     document.getElementById('installGate').style.display = 'none';
