@@ -394,7 +394,7 @@ async function handleImport() {
     const resp = await fetch('/api/import', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asin, domain, previewOnly: true })
+      body: JSON.stringify({ asin, domain, previewOnly: true, shop, token })
     });
 
     const data = await resp.json();
