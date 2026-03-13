@@ -157,10 +157,27 @@ Respond ONLY with a JSON object (no markdown, no backticks):
     const locationId = locData.locations?.[0]?.id;
 
     // ── Create product with Unsplash images ──
-    const imageUrls = productImages.length > 0
-      ? productImages.map(src => ({ src }))
-      : (p.main_image?.link ? [{ src: p.main_image.link }] : []);
+// Download Unsplash images and convert to base64 for Shopify
+async function imageToBase64(url) {
+  try {
+    const resp = await fetch(url);
+    const buffer = await resp.arrayBuffer();
+    return Buffer.from(buffer).toString("base64");
+  } catch {
+    return null;
+  }
+}
 
+let imageUrls = [];
+if (productImages.length > 0) {
+  const base64Images = await Promise.all(productImages.slice(0, 3).map(imageToBase64));
+  imageUrls = base64Images
+    .filter(Boolean)
+    .map(attachment => ({ attachment }));
+}
+if (imageUrls.length === 0 && p.main_image?.link) {
+  imageUrls = [{ src: p.main_image.link }];
+}
     const productPayload = {
       product: {
         title: ai.productTitle || title || p.title,
