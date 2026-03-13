@@ -59,21 +59,14 @@ exports.handler = async (event) => {
     // ── Store token in a secure cookie and redirect to app ──
     // In production you'd save this to a database (e.g. Supabase/PlanetScale)
     // For now we store it in a secure cookie tied to the shop
-    const tokenPayload = Buffer.from(
-      JSON.stringify({ shop, access_token })
-    ).toString("base64");
-
     return {
       statusCode: 302,
       headers: {
-        Location: `/?shop=${shop}&installed=true`,
-        "Set-Cookie": [
-          `shopify_token=${tokenPayload}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=86400`,
-          `shop=${shop}; Secure; SameSite=None; Path=/; Max-Age=86400`,
-        ],
+        Location: `/?shop=${shop}&token=${access_token}`,
       },
       body: "",
     };
+    
   } catch (err) {
     console.error("Token exchange failed:", err);
     return { statusCode: 500, body: "OAuth failed: " + err.message };

@@ -314,17 +314,26 @@ let importedProducts = [];
 let shop = null;
 
 // ── Init: check if we came back from OAuth ──
+let token = null;
+
 function init() {
   const params = new URLSearchParams(window.location.search);
   shop = params.get('shop') || getCookie('shop');
+  token = params.get('token') || null;
 
-  if (shop && params.get('installed')) {
-    // Just installed — show success toast and show app UI
+  if (shop && token) {
     showToast('success', '✓', `Connected to ${shop}!`);
+    // Save to sessionStorage so it persists on refresh
+    sessionStorage.setItem('shop', shop);
+    sessionStorage.setItem('token', token);
     window.history.replaceState({}, '', '/');
   }
 
-  if (shop) {
+  // Try sessionStorage if not in URL
+  if (!shop) shop = sessionStorage.getItem('shop');
+  if (!token) token = sessionStorage.getItem('token');
+
+  if (shop && token) {
     document.getElementById('installGate').style.display = 'none';
     document.getElementById('appUI').style.display = 'block';
     document.getElementById('shopBadge').textContent = '🏪 ' + shop;
@@ -464,6 +473,8 @@ async function confirmImport() {
         compareAt: parseFloat(document.getElementById('editCompare').value) || undefined,
         title: document.getElementById('editTitle').value || undefined,
         tags: document.getElementById('editTags').value || undefined,
+        shop: shop,
+        token: token,
       })
     });
 
