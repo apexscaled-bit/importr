@@ -1470,8 +1470,6 @@ window.doSignOut = async function() {
   await fbSignOut(auth);
   window._fbUser = null;
   sessionStorage.removeItem('importrUser');
-  document.getElementById('authBtns').style.display = '';
-  document.getElementById('userMenu').style.display = 'none';
   showToast('success', '✓', 'Signed out');
 };
 
@@ -1634,8 +1632,8 @@ function updateImportBadge() {
   }
 }
 
-function signOut() { 
-  window.doSignOut?.(); 
+async function signOut() { 
+  await window.doSignOut?.();
   // Reset gate card
   const gateTitle = document.getElementById('gateTitle');
   const gateSub = document.getElementById('gateSub');
