@@ -1646,8 +1646,14 @@ function signOut() {
   if (gateUserStrip) gateUserStrip.style.display = 'none';
   if (googleSignInSection) googleSignInSection.style.display = 'block';
   // Reset nav
-  document.getElementById('authBtns').style.display = 'flex';
-  document.getElementById('userMenu').style.display = 'none';
+  const authBtns = document.getElementById('authBtns');
+  const userMenu = document.getElementById('userMenu');
+  const navAvatar = document.getElementById('navAvatar');
+  if (authBtns) authBtns.style.display = 'flex';
+  if (userMenu) userMenu.style.display = 'none';
+  if (navAvatar) navAvatar.src = '';
+  const navName = document.getElementById('navName');
+  if (navName) navName.textContent = '';
   currentUser = null;
   sessionStorage.removeItem('importrUser');
 }
