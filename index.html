@@ -6,6 +6,8 @@
 <title>Importr — Amazon to Shopify, Instantly</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+<script src="https://cdn.shopify.com/shopifycloud/app-bridge-utils/v3/app-bridge-utils.js"></script>
 <style>
 :root {
   --bg: #060608;
@@ -1658,16 +1660,18 @@ async function signOut() {
 
 // ─── INIT ─────────────────────────────────────────────────
 function init() {
-  // Restore session
-  const savedUser = sessionStorage.getItem('importrUser');
-if (savedUser) {
-  try { 
-    const u = JSON.parse(savedUser);
-    onFullyAuthenticated(u);
-    // Force gate update
-    const gs = document.getElementById('googleSignInSection');
-    if (gs) gs.style.display = 'none';
-  } catch(e) {}
+  const params = new URLSearchParams(window.location.search);
+  
+  // Get host param Shopify passes when embedded
+  const host = params.get('host');
+  const apiKey = 'YOUR_SHOPIFY_API_KEY'; // from your Partner dashboard
+
+  // Initialize App Bridge if embedded
+  if (host && window.shopify) {
+    window.__app = window.shopify.createApp({ apiKey, host });
+  }
+
+  // rest of your existing init code...
 }
 
   const params = new URLSearchParams(window.location.search);
@@ -1741,7 +1745,16 @@ async function checkUsage() {
 function installApp() {
   const v = document.getElementById('shopInput').value.trim();
   if (!v) { showToast('error', '!', 'Enter your shop name'); return; }
-  window.top.location.href = `/auth?shop=${v.replace('.myshopify.com','')}.myshopify.com`;
+  const url = `/auth?shop=${v.replace('.myshopify.com','')}.myshopify.com`;
+  
+  // Use App Bridge if embedded, otherwise normal redirect
+  if (window.__app) {
+    const Redirect = window['app-bridge'].actions.Redirect;
+    const redirect = Redirect.create(window.__app);
+    redirect.dispatch(Redirect.Action.REMOTE, url);
+  } else {
+    window.top.location.href = url;
+  }
 }
 
 // ─── IMPORT FLOW ──────────────────────────────────────────
