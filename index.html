@@ -1634,7 +1634,23 @@ function updateImportBadge() {
   }
 }
 
-function signOut() { window.doSignOut?.(); }
+function signOut() { 
+  window.doSignOut?.(); 
+  // Reset gate card
+  const gateTitle = document.getElementById('gateTitle');
+  const gateSub = document.getElementById('gateSub');
+  const gateUserStrip = document.getElementById('gateUserStrip');
+  const googleSignInSection = document.getElementById('googleSignInSection');
+  if (gateTitle) gateTitle.textContent = 'Connect your store';
+  if (gateSub) gateSub.textContent = 'Sign in with Google to save your account, then connect your Shopify store.';
+  if (gateUserStrip) gateUserStrip.style.display = 'none';
+  if (googleSignInSection) googleSignInSection.style.display = 'block';
+  // Reset nav
+  document.getElementById('authBtns').style.display = 'flex';
+  document.getElementById('userMenu').style.display = 'none';
+  currentUser = null;
+  sessionStorage.removeItem('importrUser');
+}
 
 // ─── INIT ─────────────────────────────────────────────────
 function init() {
