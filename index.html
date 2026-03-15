@@ -1640,9 +1640,15 @@ function signOut() { window.doSignOut?.(); }
 function init() {
   // Restore session
   const savedUser = sessionStorage.getItem('importrUser');
-  if (savedUser) {
-    try { onFullyAuthenticated(JSON.parse(savedUser)); } catch(e) {}
-  }
+if (savedUser) {
+  try { 
+    const u = JSON.parse(savedUser);
+    onFullyAuthenticated(u);
+    // Force gate update
+    const gs = document.getElementById('googleSignInSection');
+    if (gs) gs.style.display = 'none';
+  } catch(e) {}
+}
 
   const params = new URLSearchParams(window.location.search);
   let shopParam = params.get('shop') || sessionStorage.getItem('shop');
