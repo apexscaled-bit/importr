@@ -1023,11 +1023,9 @@ main {
       Plans
     </button>
     <div id="shopBadge"></div>
-    <div id="authBtns">
-      <button class="nav-cta" onclick="openAuthModal()">
-        <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Sign in with Google
-      </button>
+    <div id="authBtns" style="display:flex;align-items:center;gap:8px;">
+      <button class="nav-pill" onclick="openAuthModal('login')" style="font-weight:600;">Log in</button>
+      <button class="nav-cta" onclick="openAuthModal('signup')">Get started free</button>
     </div>
     <div id="userMenu" style="display:none; align-items:center; gap:8px;">
       <img id="navAvatar" class="user-avatar" src="" alt="">
@@ -1243,27 +1241,34 @@ main {
   <div class="modal auth-modal">
     <button class="auth-close" id="authClose" onclick="closeAuthModal()">✕</button>
 
-    <!-- STEP: SIGN IN -->
+    <!-- STEP: SIGN IN / SIGN UP -->
     <div class="auth-step" id="step-google">
       <div class="auth-modal-top">
         <div class="auth-logo-mark">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </div>
-        <h2 class="auth-title">Welcome to Importr</h2>
-        <p class="auth-sub">Sign in with Google, then verify your phone to get started.</p>
+        <h2 class="auth-title" id="authModalTitle">Welcome to Importr</h2>
+        <p class="auth-sub" id="authModalSub">Sign in with Google, then verify your phone to get started.</p>
       </div>
       <div class="auth-body">
         <button class="btn-google-auth" onclick="startGoogleSignIn()">
           <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Continue with Google
+          <span id="googleBtnText">Continue with Google</span>
         </button>
-        <div class="auth-features">
+        <div class="auth-features" id="signupFeatures">
           <div class="auth-feature"><span class="auth-feature-icon">✓</span> 5 free imports included</div>
           <div class="auth-feature"><span class="auth-feature-icon">✓</span> Phone verified — max 2 accounts per number</div>
           <div class="auth-feature"><span class="auth-feature-icon">✓</span> No credit card required</div>
         </div>
+        <div id="loginNote" style="display:none; text-align:center; font-size:13px; color:var(--text-muted); padding: 8px 0;">
+          Already have an account? We'll recognize you instantly.
+        </div>
+        <div style="margin-top:16px; text-align:center;">
+          <span id="authSwitchText" style="font-size:13px; color:var(--text-muted);"></span>
+          <button id="authSwitchBtn" onclick="toggleAuthMode()" style="background:none;border:none;color:var(--accent2);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-left:4px;"></button>
+        </div>
       </div>
-      <div class="auth-footer">By signing in you agree to our <a href="#" style="color:var(--accent2);">Terms</a> and <a href="#" style="color:var(--accent2);">Privacy Policy</a>.</div>
+      <div class="auth-footer">By continuing you agree to our <a href="#" style="color:var(--accent2);">Terms</a> and <a href="#" style="color:var(--accent2);">Privacy Policy</a>.</div>
     </div>
 
     <!-- STEP: PHONE -->
@@ -1382,14 +1387,24 @@ window.startGoogleSignIn = async function() {
         : `<div class="auth-user-avatar-ph">${(googleUserTemp.displayName||'?')[0].toUpperCase()}</div>`;
     }
 
-    // If already has phone, fully done
+    const t = await googleUserTemp.getIdToken();
+
+    // LOGIN MODE: skip phone, just sign in directly
+    if (window.authMode === 'login') {
+      onFullyAuthenticated({ uid: googleUserTemp.uid, name: googleUserTemp.displayName, email: googleUserTemp.email, picture: googleUserTemp.photoURL, phone: googleUserTemp.phoneNumber || null, token: t });
+      closeAuthModal();
+      showToast('success', '✓', `Welcome back, ${googleUserTemp.displayName?.split(' ')[0]}!`);
+      return;
+    }
+
+    // SIGNUP MODE: if already has phone verified, done
     if (googleUserTemp.phoneNumber) {
-      const t = await googleUserTemp.getIdToken();
       onFullyAuthenticated({ uid: googleUserTemp.uid, name: googleUserTemp.displayName, email: googleUserTemp.email, picture: googleUserTemp.photoURL, phone: googleUserTemp.phoneNumber, token: t });
       closeAuthModal();
       return;
     }
 
+    // SIGNUP MODE: need phone verification
     showAuthStep('phone');
   } catch(err) {
     if (err.code !== 'auth/popup-closed-by-user') {
@@ -1502,10 +1517,50 @@ function showAuthStep(step, message) {
   ['phoneError','otpError'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 }
 
-function openAuthModal() {
+let authMode = 'signup'; // 'login' or 'signup'
+window.authMode = authMode;
+
+function openAuthModal(mode = 'signup') {
+  authMode = mode;
+  window.authMode = mode;
+  updateAuthModeUI();
   showAuthStep('google');
   document.getElementById('authOverlay').classList.add('visible');
   document.body.style.overflow = 'hidden';
+}
+
+function updateAuthModeUI() {
+  const title = document.getElementById('authModalTitle');
+  const sub = document.getElementById('authModalSub');
+  const btnText = document.getElementById('googleBtnText');
+  const features = document.getElementById('signupFeatures');
+  const loginNote = document.getElementById('loginNote');
+  const switchText = document.getElementById('authSwitchText');
+  const switchBtn = document.getElementById('authSwitchBtn');
+
+  if (authMode === 'login') {
+    if (title) title.textContent = 'Welcome back';
+    if (sub) sub.textContent = 'Sign in with your Google account to continue.';
+    if (btnText) btnText.textContent = 'Log in with Google';
+    if (features) features.style.display = 'none';
+    if (loginNote) loginNote.style.display = 'block';
+    if (switchText) switchText.textContent = "Don't have an account?";
+    if (switchBtn) switchBtn.textContent = 'Sign up free';
+  } else {
+    if (title) title.textContent = 'Create your account';
+    if (sub) sub.textContent = 'Sign up with Google, then verify your phone number.';
+    if (btnText) btnText.textContent = 'Continue with Google';
+    if (features) features.style.display = 'flex';
+    if (loginNote) loginNote.style.display = 'none';
+    if (switchText) switchText.textContent = 'Already have an account?';
+    if (switchBtn) switchBtn.textContent = 'Log in';
+  }
+}
+
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  window.authMode = authMode;
+  updateAuthModeUI();
 }
 
 function closeAuthModal() {
