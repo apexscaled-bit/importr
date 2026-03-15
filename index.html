@@ -2113,7 +2113,14 @@
           appVerifier = window._recaptcha;
         }
 
-        confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
+        if (!window._recaptcha) {
+          window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: () => { }
+          });
+          await window._recaptcha.render();
+        }
+        confirmationResult = await signInWithPhoneNumber(auth, phone, window._recaptcha);
         document.getElementById('otpSentTo').textContent = phone;
         showAuthStep('otp');
       } catch (err) {
