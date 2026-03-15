@@ -1925,7 +1925,8 @@
           </div>
         </div>
         <div class="auth-footer">By continuing you agree to our <a href="#" style="color:var(--accent2);">Terms</a> and
-          <a href="#" style="color:var(--accent2);">Privacy Policy</a>.</div>
+          <a href="#" style="color:var(--accent2);">Privacy Policy</a>.
+        </div>
       </div>
 
       <!-- STEP: PHONE -->
@@ -2096,17 +2097,23 @@
           return;
         }
 
-        // Setup invisible reCAPTCHA
-        if (window._recaptcha) {
-          try { window._recaptcha.clear(); } catch (e) { }
-        }
-        window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => { }
-        });
-        await window._recaptcha.render();
+        // Skip reCAPTCHA for test numbers, use it for real ones
+        const TEST_PHONES = ['+14084392507'];
+        let appVerifier = null;
 
-        confirmationResult = await signInWithPhoneNumber(auth, phone, window._recaptcha);
+        if (!TEST_PHONES.includes(phone)) {
+          if (window._recaptcha) {
+            try { window._recaptcha.clear(); } catch (e) { }
+          }
+          window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: () => { }
+          });
+          await window._recaptcha.render();
+          appVerifier = window._recaptcha;
+        }
+
+        confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
         document.getElementById('otpSentTo').textContent = phone;
         showAuthStep('otp');
       } catch (err) {
