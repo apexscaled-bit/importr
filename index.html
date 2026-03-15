@@ -1741,7 +1741,7 @@ async function checkUsage() {
 function installApp() {
   const v = document.getElementById('shopInput').value.trim();
   if (!v) { showToast('error', '!', 'Enter your shop name'); return; }
-  window.location.href = `/auth?shop=${v.replace('.myshopify.com','')}.myshopify.com`;
+  window.top.location.href = `/auth?shop=${v.replace('.myshopify.com','')}.myshopify.com`;
 }
 
 // ─── IMPORT FLOW ──────────────────────────────────────────
