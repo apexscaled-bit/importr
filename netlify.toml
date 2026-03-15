@@ -39,6 +39,7 @@
   status = 200
 
 [[redirects]]
-  from = "/api/auth/check-phone"
+  from = "/api/check-phone"
   to = "/.netlify/functions/check-phone"
   status = 200
+  
