@@ -1845,38 +1845,29 @@
 
   <!-- PLANS MODAL -->
   <div class="overlay" id="plansOverlay">
-    <div class="modal" style="max-width:680px;">
+    <div class="modal" style="max-width:560px;">
       <div class="modal-head">
         <div class="modal-title">Choose a plan</div>
         <button class="modal-x" onclick="closePlansModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:14px; color:var(--text-muted); margin-bottom:24px; line-height:1.6;">
-          Choose a plan to start importing Amazon products directly into your Shopify store.
-        </p>
-        <div class="plans-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <p style="font-size:14px; color:var(--text-muted); margin-bottom:24px; line-height:1.6;">Start with 5 free
+          imports. Upgrade anytime to unlock unlimited imports and premium features.</p>
+        <div class="plans-grid">
           <div class="plan-card">
-            <div class="plan-price-num">$0</div>
-            <div class="plan-per">free forever</div>
-            <div class="plan-name">Free</div>
-            <div class="plan-features">5 imports total<br>Manual pricing<br>Basic support<br>&nbsp;</div>
-            <button class="plan-btn"
-              style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);"
-              onclick="selectPlan('free')">Get Started Free</button>
-          </div>
-          <div class="plan-card best">
-            <div class="plan-badge-tag">POPULAR</div>
             <div class="plan-price-num">$19</div>
             <div class="plan-per">/month</div>
             <div class="plan-name">Pro</div>
             <div class="plan-features">Unlimited imports<br>AI descriptions<br>Image sourcing<br>Priority support</div>
             <button class="plan-btn" onclick="selectPlan('pro')">Get Pro →</button>
           </div>
-          <div class="plan-card">
+          <div class="plan-card best">
+            <div class="plan-badge-tag">BEST VALUE</div>
             <div class="plan-price-num">$49</div>
             <div class="plan-per">/month</div>
             <div class="plan-name">Business</div>
-            <div class="plan-features">Everything in Pro<br>Bulk import<br>Analytics dashboard<br>Early access</div>
+            <div class="plan-features">Everything in Pro<br>Bulk import<br>Analytics dashboard<br>Early access features
+            </div>
             <button class="plan-btn" onclick="selectPlan('business')">Get Business →</button>
           </div>
         </div>
@@ -2315,273 +2306,259 @@
 
       closeAuthModal();
 
-      // Always show the import UI upfront
-      document.getElementById('installGate').style.display = 'none';
-      document.getElementById('appUI').style.display = 'block';
+      if (shop && token) {
+        document.getElementById('installGate').style.display = 'none';
+        document.getElementById('appUI').style.display = 'block';
+        checkUsage();
+      }
+    }
+
+    // Update import badge when usage changes
+    function updateImportBadge() {
+      const badge = document.getElementById('gateImportBadge');
+      if (badge && currentUser) {
+        const remaining = userPlan === 'free' ? FREE_LIMIT - importsUsed : '∞';
+        badge.textContent = userPlan === 'free' ? `${remaining} imports left` : '∞ imports';
+        badge.style.color = (remaining <= 1 && userPlan === 'free') ? 'var(--warning)' : 'var(--accent2)';
+      }
+    }
+
+    async function signOut() {
+      await window.doSignOut?.();
+      // Reset gate card
+      const gateTitle = document.getElementById('gateTitle');
+      const gateSub = document.getElementById('gateSub');
+      const gateUserStrip = document.getElementById('gateUserStrip');
+      const googleSignInSection = document.getElementById('googleSignInSection');
+      if (gateTitle) gateTitle.textContent = 'Connect your store';
+      if (gateSub) gateSub.textContent = 'Sign in with Google to save your account, then connect your Shopify store.';
+      if (gateUserStrip) gateUserStrip.style.display = 'none';
+      if (googleSignInSection) googleSignInSection.style.display = 'block';
+      // Reset nav
+      const authBtns = document.getElementById('authBtns');
+      const userMenu = document.getElementById('userMenu');
+      const navAvatar = document.getElementById('navAvatar');
+      if (authBtns) authBtns.style.display = 'flex';
+      if (userMenu) userMenu.style.display = 'none';
+      if (navAvatar) navAvatar.src = '';
+      const navName = document.getElementById('navName');
+      if (navName) navName.textContent = '';
+      currentUser = null;
+      sessionStorage.removeItem('importrUser');
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────
+    function init() {
+      // Restore session
+      const savedUser = sessionStorage.getItem('importrUser');
+      if (savedUser) {
+        try {
+          const u = JSON.parse(savedUser);
+          onFullyAuthenticated(u);
+          // Force gate update
+          const gs = document.getElementById('googleSignInSection');
+          if (gs) gs.style.display = 'none';
+        } catch (e) { }
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      let shopParam = params.get('shop') || sessionStorage.getItem('shop');
+
+      // Detect embedded in Shopify admin
+      try {
+        const adminMatch = window.location.ancestorOrigins?.[0]?.match(/admin\.shopify\.com\/store\/([^/]+)/);
+        if (adminMatch) shopParam = adminMatch[1] + '.myshopify.com';
+      } catch (e) { }
+
+      shop = shopParam;
+      token = params.get('token') || sessionStorage.getItem('token');
+
+      if (shop && params.get('token')) {
+        sessionStorage.setItem('shop', shop);
+        sessionStorage.setItem('token', token);
+        window.history.replaceState({}, '', '/');
+        showToast('success', '✓', `Connected to ${shop}!`);
+      }
+
+      if (!shop) shop = sessionStorage.getItem('shop');
+      if (!token) token = sessionStorage.getItem('token');
+
+      if (params.get('billing') === 'success') {
+        showToast('success', '✦', 'Plan upgraded!');
+        window.history.replaceState({}, '', '/');
+      }
 
       if (shop && token) {
+        document.getElementById('installGate').style.display = 'none';
+        document.getElementById('appUI').style.display = 'block';
         updateShopBadge();
         checkUsage();
       }
+    }
 
-      // Update import badge when usage changes
-      function updateImportBadge() {
-        const badge = document.getElementById('gateImportBadge');
-        if (badge && currentUser) {
-          const remaining = userPlan === 'free' ? FREE_LIMIT - importsUsed : '∞';
-          badge.textContent = userPlan === 'free' ? `${remaining} imports left` : '∞ imports';
-          badge.style.color = (remaining <= 1 && userPlan === 'free') ? 'var(--warning)' : 'var(--accent2)';
-        }
-      }
-
-      async function signOut() {
-        await window.doSignOut?.();
-        // Reset gate card
-        const gateTitle = document.getElementById('gateTitle');
-        const gateSub = document.getElementById('gateSub');
-        const gateUserStrip = document.getElementById('gateUserStrip');
-        const googleSignInSection = document.getElementById('googleSignInSection');
-        if (gateTitle) gateTitle.textContent = 'Connect your store';
-        if (gateSub) gateSub.textContent = 'Sign in with Google to save your account, then connect your Shopify store.';
-        if (gateUserStrip) gateUserStrip.style.display = 'none';
-        if (googleSignInSection) googleSignInSection.style.display = 'block';
-        // Reset nav
-        const authBtns = document.getElementById('authBtns');
-        const userMenu = document.getElementById('userMenu');
-        const navAvatar = document.getElementById('navAvatar');
-        if (authBtns) authBtns.style.display = 'flex';
-        if (userMenu) userMenu.style.display = 'none';
-        if (navAvatar) navAvatar.src = '';
-        const navName = document.getElementById('navName');
-        if (navName) navName.textContent = '';
-        currentUser = null;
-        sessionStorage.removeItem('importrUser');
-      }
-
-      // ─── INIT ─────────────────────────────────────────────────
-      function init() {
-        // Restore session
-        const savedUser = sessionStorage.getItem('importrUser');
-        if (savedUser) {
-          try {
-            const u = JSON.parse(savedUser);
-            onFullyAuthenticated(u);
-            // Force gate update
-            const gs = document.getElementById('googleSignInSection');
-            if (gs) gs.style.display = 'none';
-          } catch (e) { }
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        let shopParam = params.get('shop') || sessionStorage.getItem('shop');
-
-        // Detect embedded in Shopify admin
-        try {
-          const adminMatch = window.location.ancestorOrigins?.[0]?.match(/admin\.shopify\.com\/store\/([^/]+)/);
-          if (adminMatch) shopParam = adminMatch[1] + '.myshopify.com';
-        } catch (e) { }
-
-        shop = shopParam;
-        token = params.get('token') || sessionStorage.getItem('token');
-
-        if (shop && params.get('token')) {
-          sessionStorage.setItem('shop', shop);
-          sessionStorage.setItem('token', token);
-          window.history.replaceState({}, '', '/');
-          showToast('success', '✓', `Connected to ${shop}!`);
-        }
-
-        if (!shop) shop = sessionStorage.getItem('shop');
-        if (!token) token = sessionStorage.getItem('token');
-
-        if (params.get('billing') === 'success') {
-          showToast('success', '✦', 'Plan upgraded!');
-          window.history.replaceState({}, '', '/');
-        }
-
-        // Always show import UI upfront
-        document.getElementById('installGate').style.display = 'none';
-        document.getElementById('appUI').style.display = 'block';
-
-        if (shop && token) {
-          updateShopBadge();
-          checkUsage();
-        }
-
-        // ─── SHOP BADGE ───────────────────────────────────────────
-        function updateShopBadge() {
-          const badge = document.getElementById('shopBadge');
-          const remaining = FREE_LIMIT - importsUsed;
-          if (!shop) { badge.innerHTML = ''; return; }
-          if (userPlan === 'free') {
-            badge.innerHTML = `
+    // ─── SHOP BADGE ───────────────────────────────────────────
+    function updateShopBadge() {
+      const badge = document.getElementById('shopBadge');
+      const remaining = FREE_LIMIT - importsUsed;
+      if (!shop) { badge.innerHTML = ''; return; }
+      if (userPlan === 'free') {
+        badge.innerHTML = `
       <span style="color:var(--text-muted)">🏪 ${shop}</span>
       <span style="padding:3px 10px;background:var(--accent-dim);border:1px solid rgba(124,107,255,0.2);border-radius:100px;font-size:11px;font-weight:700;color:var(--accent2);">${remaining > 0 ? remaining + ' imports left' : '⚠ Limit reached'}</span>
       <button onclick="showPlansModal()" style="padding:5px 12px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Upgrade</button>
     `;
-          } else {
-            badge.innerHTML = `<span style="color:var(--text-muted)">🏪 ${shop}</span> <span style="color:var(--accent2);font-weight:700;">✦ ${userPlan.toUpperCase()}</span>`;
-          }
-        }
+      } else {
+        badge.innerHTML = `<span style="color:var(--text-muted)">🏪 ${shop}</span> <span style="color:var(--accent2);font-weight:700;">✦ ${userPlan.toUpperCase()}</span>`;
+      }
+    }
 
-        async function checkUsage() {
-          if (!shop || !token) return;
-          try {
-            const r = await fetch('/api/usage', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ shop, token, action: 'get' })
-            });
-            const d = await r.json();
-            importsUsed = d.imports_count || 0;
-            userPlan = d.plan || 'free';
-            updateShopBadge();
-            updateImportBadge();
-          } catch (e) { }
-        }
+    async function checkUsage() {
+      if (!shop || !token) return;
+      try {
+        const r = await fetch('/api/usage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shop, token, action: 'get' })
+        });
+        const d = await r.json();
+        importsUsed = d.imports_count || 0;
+        userPlan = d.plan || 'free';
+        updateShopBadge();
+        updateImportBadge();
+      } catch (e) { }
+    }
 
-        // ─── INSTALL ──────────────────────────────────────────────
-        function installApp() {
-          const v = document.getElementById('shopInput').value.trim();
-          if (!v) { showToast('error', '!', 'Enter your shop name'); return; }
-          window.top.location.href = `/auth?shop=${v.replace('.myshopify.com', '')}.myshopify.com`;
-        }
+    // ─── INSTALL ──────────────────────────────────────────────
+    function installApp() {
+      const v = document.getElementById('shopInput').value.trim();
+      if (!v) { showToast('error', '!', 'Enter your shop name'); return; }
+      window.top.location.href = `/auth?shop=${v.replace('.myshopify.com', '')}.myshopify.com`;
+    }
 
-        // ─── IMPORT FLOW ──────────────────────────────────────────
-        function setUrl(u) { document.getElementById('urlInput').value = u; }
+    // ─── IMPORT FLOW ──────────────────────────────────────────
+    function setUrl(u) { document.getElementById('urlInput').value = u; }
 
-        function extractAsin(url) {
-          const patterns = [
-            /\/dp\/([A-Z0-9]{10})/i,
-            /\/gp\/product\/([A-Z0-9]{10})/i,
-            /\/product\/([A-Z0-9]{10})/i,
-            /[?&]asin=([A-Z0-9]{10})/i,
-          ];
-          for (const p of patterns) { const m = url.match(p); if (m) return m[1].toUpperCase(); }
-          return null;
-        }
+    function extractAsin(url) {
+      const patterns = [
+        /\/dp\/([A-Z0-9]{10})/i,
+        /\/gp\/product\/([A-Z0-9]{10})/i,
+        /\/product\/([A-Z0-9]{10})/i,
+        /[?&]asin=([A-Z0-9]{10})/i,
+      ];
+      for (const p of patterns) { const m = url.match(p); if (m) return m[1].toUpperCase(); }
+      return null;
+    }
 
-        async function handleImport() {
-          const url = document.getElementById('urlInput').value.trim();
-          if (!url) { showStatus('Enter an Amazon product URL', true); return; }
+    async function handleImport() {
+      if (userPlan === 'free' && importsUsed >= FREE_LIMIT) { showPlansModal(); return; }
 
-          const asin = extractAsin(url);
-          if (!asin) { showStatus('Could not parse product ID — paste the full Amazon URL', true); setTimeout(hideStatus, 4000); return; }
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) { showStatus('Enter an Amazon product URL', true); return; }
 
-          // If not authenticated or no shop, show plans first
-          if (!currentUser || !shop || !token) {
-            showPlansModal();
-            return;
-          }
+      const asin = extractAsin(url);
+      if (!asin) { showStatus('Could not parse product ID — paste the full Amazon URL', true); setTimeout(hideStatus, 4000); return; }
 
-          // If on free plan and limit reached, show plans
-          if (userPlan === 'free' && importsUsed >= FREE_LIMIT) {
-            showPlansModal();
-            return;
-          }
+      const domainMatch = url.match(/amazon\.([a-z.]+)/i);
+      const domain = domainMatch ? 'amazon.' + domainMatch[1] : 'amazon.com';
 
-          // Otherwise proceed with import
-          const domainMatch = url.match(/amazon\.([a-z.]+)/i);
-          const domain = domainMatch ? 'amazon.' + domainMatch[1] : 'amazon.com';
+      showStatus('Fetching product & generating AI content...', false);
+      document.getElementById('importBtn').disabled = true;
 
-          showStatus('Fetching product & generating AI content...', false);
-          document.getElementById('importBtn').disabled = true;
+      try {
+        const r = await fetch('/api/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ asin, domain, previewOnly: true, shop, token })
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed');
+        hideStatus();
+        document.getElementById('importBtn').disabled = false;
+        pendingProduct = { ...d.amazonProduct, asin, domain };
+        openConfirmModal(pendingProduct);
+      } catch (err) {
+        hideStatus();
+        document.getElementById('importBtn').disabled = false;
+        showStatus('Error: ' + err.message, true);
+        setTimeout(hideStatus, 4000);
+      }
+    }
 
-          try {
-            const r = await fetch('/api/import', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ asin, domain, previewOnly: true, shop, token })
-            });
-            const d = await r.json();
-            if (!r.ok) throw new Error(d.error || 'Failed');
-            hideStatus();
-            document.getElementById('importBtn').disabled = false;
-            pendingProduct = { ...d.amazonProduct, asin, domain };
-            openConfirmModal(pendingProduct);
-          } catch (err) {
-            hideStatus();
-            document.getElementById('importBtn').disabled = false;
-            showStatus('Error: ' + err.message, true);
-            setTimeout(hideStatus, 4000);
-          }
-        }
-
-        function openConfirmModal(p) {
-          const img = p.image ? `<img class="prev-img" src="${p.image}" alt="">` : `<div class="prev-img-ph">📦</div>`;
-          document.getElementById('productPreview').innerHTML = `
+    function openConfirmModal(p) {
+      const img = p.image ? `<img class="prev-img" src="${p.image}" alt="">` : `<div class="prev-img-ph">📦</div>`;
+      document.getElementById('productPreview').innerHTML = `
     ${img}
     <div>
       <div class="prev-title">${p.title}</div>
       <div class="prev-meta">${p.brand ? `by ${p.brand} · ` : ''}${p.rating ? `⭐ ${p.rating}` : ''}${p.amazon_cost > 0 ? ` · Cost: $${p.amazon_cost.toFixed(2)}` : ''}</div>
     </div>`;
-          document.getElementById('editPrice').value = p.amazon_cost > 0 ? (p.amazon_cost * 2.5).toFixed(2) : '';
-          document.getElementById('editCompare').value = p.amazon_cost > 0 ? (p.amazon_cost * 3).toFixed(2) : '';
-          document.getElementById('editTitle').value = '';
-          document.getElementById('editTags').value = p.tags || '';
-          calcMargin();
-          document.getElementById('confirmOverlay').classList.add('visible');
-          document.body.style.overflow = 'hidden';
-        }
+      document.getElementById('editPrice').value = p.amazon_cost > 0 ? (p.amazon_cost * 2.5).toFixed(2) : '';
+      document.getElementById('editCompare').value = p.amazon_cost > 0 ? (p.amazon_cost * 3).toFixed(2) : '';
+      document.getElementById('editTitle').value = '';
+      document.getElementById('editTags').value = p.tags || '';
+      calcMargin();
+      document.getElementById('confirmOverlay').classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
 
-        function closeModal() {
-          document.getElementById('confirmOverlay').classList.remove('visible');
-          document.body.style.overflow = '';
-        }
+    function closeModal() {
+      document.getElementById('confirmOverlay').classList.remove('visible');
+      document.body.style.overflow = '';
+    }
 
-        function calcMargin() {
-          const cost = pendingProduct?.amazon_cost || 0;
-          const price = parseFloat(document.getElementById('editPrice').value) || 0;
-          const hint = document.getElementById('marginHint');
-          if (cost > 0 && price > 0) {
-            const margin = ((price - cost) / price * 100).toFixed(1);
-            const profit = (price - cost).toFixed(2);
-            hint.textContent = `✦ Margin: ${margin}% · Profit/sale: $${profit}`;
-            hint.style.color = parseFloat(margin) > 40 ? 'var(--green)' : 'var(--warning)';
-          } else { hint.textContent = ''; }
-        }
+    function calcMargin() {
+      const cost = pendingProduct?.amazon_cost || 0;
+      const price = parseFloat(document.getElementById('editPrice').value) || 0;
+      const hint = document.getElementById('marginHint');
+      if (cost > 0 && price > 0) {
+        const margin = ((price - cost) / price * 100).toFixed(1);
+        const profit = (price - cost).toFixed(2);
+        hint.textContent = `✦ Margin: ${margin}% · Profit/sale: $${profit}`;
+        hint.style.color = parseFloat(margin) > 40 ? 'var(--green)' : 'var(--warning)';
+      } else { hint.textContent = ''; }
+    }
 
-        async function confirmImport() {
-          if (!pendingProduct) return;
-          const btn = document.getElementById('confirmBtn');
-          btn.disabled = true;
-          btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-top-color:#fff;border-color:rgba(255,255,255,0.2);"></div> Adding...';
+    async function confirmImport() {
+      if (!pendingProduct) return;
+      const btn = document.getElementById('confirmBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-top-color:#fff;border-color:rgba(255,255,255,0.2);"></div> Adding...';
 
-          try {
-            const r = await fetch('/api/import', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                asin: pendingProduct.asin,
-                domain: pendingProduct.domain,
-                price: parseFloat(document.getElementById('editPrice').value) || undefined,
-                compareAt: parseFloat(document.getElementById('editCompare').value) || undefined,
-                title: document.getElementById('editTitle').value || undefined,
-                tags: document.getElementById('editTags').value || undefined,
-                shop, token,
-              })
-            });
-            const d = await r.json();
-            if (!r.ok) throw new Error(d.error || 'Import failed');
-            closeModal();
-            showSuccessCard(d.product);
-            if (d.aiContent) showAiCard(d.aiContent);
-            updateStats(d.product);
-            importsUsed++;
-            updateShopBadge();
-            document.getElementById('urlInput').value = '';
-            showToast('success', '✓', 'Product added to your store!');
-          } catch (err) {
-            showToast('error', '!', err.message);
-          } finally {
-            btn.disabled = false;
-            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Add to Store`;
-          }
-        }
+      try {
+        const r = await fetch('/api/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            asin: pendingProduct.asin,
+            domain: pendingProduct.domain,
+            price: parseFloat(document.getElementById('editPrice').value) || undefined,
+            compareAt: parseFloat(document.getElementById('editCompare').value) || undefined,
+            title: document.getElementById('editTitle').value || undefined,
+            tags: document.getElementById('editTags').value || undefined,
+            shop, token,
+          })
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Import failed');
+        closeModal();
+        showSuccessCard(d.product);
+        if (d.aiContent) showAiCard(d.aiContent);
+        updateStats(d.product);
+        importsUsed++;
+        updateShopBadge();
+        document.getElementById('urlInput').value = '';
+        showToast('success', '✓', 'Product added to your store!');
+      } catch (err) {
+        showToast('error', '!', err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Add to Store`;
+      }
+    }
 
-        function showSuccessCard(p) {
-          const img = p.image ? `<img class="success-img" src="${p.image}" alt="">` : `<div class="success-img-ph">📦</div>`;
-          document.getElementById('successProduct').innerHTML = `
+    function showSuccessCard(p) {
+      const img = p.image ? `<img class="success-img" src="${p.image}" alt="">` : `<div class="success-img-ph">📦</div>`;
+      document.getElementById('successProduct').innerHTML = `
     ${img}
     <div>
       <div class="success-info-title">${p.title}</div>
@@ -2591,112 +2568,85 @@
         <a class="btn-ghost" href="${p.storefront_url}" target="_blank">Storefront ↗</a>
       </div>
     </div>`;
-          document.getElementById('successCard').classList.add('visible');
-        }
+      document.getElementById('successCard').classList.add('visible');
+    }
 
-        function showAiCard(ai) {
-          if (!ai?.storeName) return;
-          document.getElementById('aiGrid').innerHTML = `
+    function showAiCard(ai) {
+      if (!ai?.storeName) return;
+      document.getElementById('aiGrid').innerHTML = `
     <div class="ai-item"><div class="ai-label">Store Name</div><div class="ai-value">${ai.storeName || '—'}</div></div>
     <div class="ai-item"><div class="ai-label">Tagline</div><div class="ai-value">${ai.tagline || '—'}</div></div>
     <div class="ai-item"><div class="ai-label">Hero Heading</div><div class="ai-value">${ai.heroHeading || '—'}</div></div>
     <div class="ai-item"><div class="ai-label">SEO Title</div><div class="ai-value">${ai.seoTitle || '—'}</div></div>`;
-          document.getElementById('aiCard').classList.add('visible');
-        }
+      document.getElementById('aiCard').classList.add('visible');
+    }
 
-        function updateStats(p) {
-          importedProducts.push(p);
-          document.getElementById('statsBar').classList.add('visible');
-          document.getElementById('statCount').textContent = importedProducts.length;
-          const rev = importedProducts.reduce((s, x) => s + parseFloat(x.price || 0), 0);
-          document.getElementById('statRevenue').textContent = '$' + rev.toFixed(0);
-          const margins = importedProducts.filter(x => x.price && x.amazon_cost);
-          const avg = margins.length ? (margins.reduce((s, x) => s + (parseFloat(x.price) - x.amazon_cost) / parseFloat(x.price) * 100, 0) / margins.length).toFixed(0) : 0;
-          document.getElementById('statMargin').textContent = avg + '%';
-        }
+    function updateStats(p) {
+      importedProducts.push(p);
+      document.getElementById('statsBar').classList.add('visible');
+      document.getElementById('statCount').textContent = importedProducts.length;
+      const rev = importedProducts.reduce((s, x) => s + parseFloat(x.price || 0), 0);
+      document.getElementById('statRevenue').textContent = '$' + rev.toFixed(0);
+      const margins = importedProducts.filter(x => x.price && x.amazon_cost);
+      const avg = margins.length ? (margins.reduce((s, x) => s + (parseFloat(x.price) - x.amazon_cost) / parseFloat(x.price) * 100, 0) / margins.length).toFixed(0) : 0;
+      document.getElementById('statMargin').textContent = avg + '%';
+    }
 
-        // ─── PLANS ────────────────────────────────────────────────
-        function showPlansModal() {
-          document.getElementById('plansOverlay').classList.add('visible');
-          document.body.style.overflow = 'hidden';
-        }
-        function closePlansModal() {
-          document.getElementById('plansOverlay').classList.remove('visible');
-          document.body.style.overflow = '';
-        }
+    // ─── PLANS ────────────────────────────────────────────────
+    function showPlansModal() {
+      document.getElementById('plansOverlay').classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePlansModal() {
+      document.getElementById('plansOverlay').classList.remove('visible');
+      document.body.style.overflow = '';
+    }
 
-        async function selectPlan(plan) {
-          // Store intended plan
-          sessionStorage.setItem('intendedPlan', plan);
+    async function selectPlan(plan) {
+      showToast('success', '⏳', 'Redirecting to billing...');
+      try {
+        const r = await fetch('/api/billing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shop, token, plan })
+        });
+        const d = await r.json();
+        if (d.confirmUrl) window.top.location.href = d.confirmUrl;
+        else showToast('error', '!', d.error || 'Billing error');
+      } catch (e) {
+        showToast('error', '!', e.message);
+      }
+    }
 
-          // If not authenticated, go through auth first
-          if (!currentUser) {
-            closePlansModal();
-            openAuthModal('signup');
-            return;
-          }
+    // ─── UI HELPERS ───────────────────────────────────────────
+    function showStatus(msg, isError) {
+      const bar = document.getElementById('statusBar');
+      bar.classList.add('visible');
+      bar.className = 'status visible ' + (isError ? 'error' : 'loading');
+      document.getElementById('statusSpinner').style.display = isError ? 'none' : 'block';
+      document.getElementById('statusText').textContent = msg;
+    }
+    function hideStatus() { document.getElementById('statusBar').classList.remove('visible'); }
 
-          // If no shop connected, show connect gate
-          if (!shop || !token) {
-            closePlansModal();
-            document.getElementById('installGate').style.display = 'block';
-            document.getElementById('installGate').scrollIntoView({ behavior: 'smooth' });
-            showToast('success', '✓', 'Almost there — connect your Shopify store!');
-            return;
-          }
+    let toastTimer;
+    function showToast(type, icon, msg) {
+      const t = document.getElementById('toast');
+      t.className = 'toast ' + type;
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+    }
 
-          // If free plan, just proceed
-          if (plan === 'free') {
-            closePlansModal();
-            showToast('success', '✓', 'You\'re on the free plan — 5 imports included!');
-            return;
-          }
+    // ─── EVENT LISTENERS ──────────────────────────────────────
+    document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === document.getElementById('confirmOverlay')) closeModal(); });
+    document.getElementById('plansOverlay').addEventListener('click', e => { if (e.target === document.getElementById('plansOverlay')) closePlansModal(); });
+    document.getElementById('authOverlay')?.addEventListener('click', e => { if (e.target === document.getElementById('authOverlay')) closeAuthModal(); });
+    document.getElementById('urlInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleImport(); });
+    document.getElementById('shopInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') installApp(); });
 
-          // Paid plan — go to Shopify billing
-          showToast('success', '⏳', 'Redirecting to billing...');
-          try {
-            const r = await fetch('/api/billing', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ shop, token, plan })
-            });
-            const d = await r.json();
-            if (d.confirmUrl) window.top.location.href = d.confirmUrl;
-            else showToast('error', '!', d.error || 'Billing error');
-          } catch (e) {
-            showToast('error', '!', e.message);
-          }
-        }
-
-        // ─── UI HELPERS ───────────────────────────────────────────
-        function showStatus(msg, isError) {
-          const bar = document.getElementById('statusBar');
-          bar.classList.add('visible');
-          bar.className = 'status visible ' + (isError ? 'error' : 'loading');
-          document.getElementById('statusSpinner').style.display = isError ? 'none' : 'block';
-          document.getElementById('statusText').textContent = msg;
-        }
-        function hideStatus() { document.getElementById('statusBar').classList.remove('visible'); }
-
-        let toastTimer;
-        function showToast(type, icon, msg) {
-          const t = document.getElementById('toast');
-          t.className = 'toast ' + type;
-          document.getElementById('toastIcon').textContent = icon;
-          document.getElementById('toastMsg').textContent = msg;
-          t.classList.add('show');
-          clearTimeout(toastTimer);
-          toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
-        }
-
-        // ─── EVENT LISTENERS ──────────────────────────────────────
-        document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === document.getElementById('confirmOverlay')) closeModal(); });
-        document.getElementById('plansOverlay').addEventListener('click', e => { if (e.target === document.getElementById('plansOverlay')) closePlansModal(); });
-        document.getElementById('authOverlay')?.addEventListener('click', e => { if (e.target === document.getElementById('authOverlay')) closeAuthModal(); });
-        document.getElementById('urlInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleImport(); });
-        document.getElementById('shopInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') installApp(); });
-
-        init();
+    init();
   </script>
 </body>
 
