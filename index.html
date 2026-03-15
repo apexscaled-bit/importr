@@ -2119,7 +2119,7 @@
       } catch (err) {
         window._recaptcha = null;
         showAuthStep('phone');
-        showFieldError('phoneError', getFirebaseError(err.code) || 'Failed to send code.');
+        console.error('Firebase phone error:', err.code, err.message);
       }
     };
 
