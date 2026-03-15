@@ -37,3 +37,8 @@
   from = "/auth/google/callback"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/api/auth/check-phone"
+  to = "/.netlify/functions/check-phone"
+  status = 200
