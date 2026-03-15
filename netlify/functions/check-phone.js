@@ -1,82 +1,99 @@
-/ netlify/functions/check-phone.js
-// Checks if a phone number has reached the 2-account limit
-
-import { neon } from '@netlify/neon';
-
-export default async (req) => {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
-
-  try {
-    const { phone, email } = await req.json();
-
+exports.handler = async (event) => {
+    if (event.httpMethod !== 'POST') {
+      return { statusCode: 405, body: 'Method not allowed' };
+    }
+  
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json',
+    };
+  
+    if (event.httpMethod === 'OPTIONS') {
+      return { statusCode: 200, headers, body: '' };
+    }
+  
+    let body;
+    try {
+      body = JSON.parse(event.body || '{}');
+    } catch {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    }
+  
+    const { phone, uid, email, action } = body;
+  
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+  
     if (!phone) {
-      return new Response(JSON.stringify({ error: 'Phone required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing phone' }) };
     }
-
-    const sql = neon(process.env.NETLIFY_DATABASE_URL);
-
-    // Create table if it doesn't exist
-    await sql`
-      CREATE TABLE IF NOT EXISTS user_accounts (
-        id SERIAL PRIMARY KEY,
-        email TEXT NOT NULL UNIQUE,
-        phone TEXT,
-        created_at TIMESTAMP DEFAULT NOW(),
-        imports_count INTEGER DEFAULT 0,
-        plan TEXT DEFAULT 'free'
-      )
-    `;
-
-    // Check how many accounts already use this phone
-    const existing = await sql`
-      SELECT email FROM user_accounts 
-      WHERE phone = ${phone}
-    `;
-
-    const accountCount = existing.length;
-    const alreadyOwned = existing.some(row => row.email === email);
-
-    // Block if 2+ accounts on this number AND this email isn't one of them
-    if (accountCount >= 2 && !alreadyOwned) {
-      return new Response(JSON.stringify({ 
-        blocked: true, 
-        reason: 'Phone number limit reached (max 2 accounts)' 
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+  
+    try {
+      if (action === 'register') {
+        // Try to insert — will fail if phone already exists (UNIQUE constraint)
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/phone_accounts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({ phone, uid, email }),
+        });
+  
+        if (resp.status === 409) {
+          // Phone already registered to another account
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ blocked: true, reason: 'phone_taken' }),
+          };
+        }
+  
+        if (!resp.ok) {
+          const err = await resp.text();
+          // If uid already exists, that's fine — same user re-registering
+          if (err.includes('uid')) {
+            return { statusCode: 200, headers, body: JSON.stringify({ blocked: false }) };
+          }
+          throw new Error('Database error: ' + err);
+        }
+  
+        return { statusCode: 200, headers, body: JSON.stringify({ blocked: false }) };
+  
+      } else {
+        // action === 'check' — just check if phone is already taken
+        const resp = await fetch(
+          `${SUPABASE_URL}/rest/v1/phone_accounts?phone=eq.${encodeURIComponent(phone)}&select=uid`,
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+            },
+          }
+        );
+  
+        const rows = await resp.json();
+  
+        if (rows.length > 0 && rows[0].uid !== uid) {
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ blocked: true, reason: 'phone_taken' }),
+          };
+        }
+  
+        return { statusCode: 200, headers, body: JSON.stringify({ blocked: false }) };
+      }
+  
+    } catch (err) {
+      console.error('check-phone error:', err);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: err.message }),
+      };
     }
-
-    // Register/update this account's phone
-    if (email) {
-      await sql`
-        INSERT INTO user_accounts (email, phone)
-        VALUES (${email}, ${phone})
-        ON CONFLICT (email) DO UPDATE SET phone = ${phone}
-      `;
-    }
-
-    return new Response(JSON.stringify({ 
-      blocked: false,
-      accountCount,
-      alreadyOwned
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-  } catch (err) {
-    console.error('check-phone error:', err);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-};
-
-export const config = { path: '/api/auth/check-phone' };
+  };

@@ -1424,7 +1424,7 @@ window.sendSmsCode = async function() {
 
   try {
     // Check 2-account limit
-    const check = await fetch('/api/auth/check-phone', {
+    const check = await fetch('/api/check-phone', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ phone, email: googleUserTemp?.email })
