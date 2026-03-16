@@ -658,20 +658,9 @@
       <a class="nav-link" href="/faq">FAQ</a>
     </div>
     <div class="nav-right">
-      <div class="nav-right">
-        <div id="authBtns" style="display:flex;align-items:center;gap:8px;">
-          <button class="nav-pill" onclick="openAuthModal('login')">Log in</button>
-          <button class="nav-cta" onclick="openAuthModal('signup')">Start free →</button>
-        </div>
-        <div id="userMenu" style="display:none;align-items:center;gap:8px;">
-          <div id="navAvatarWrap"
-            style="width:26px;height:26px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent2);">
-          </div>
-          <span id="navName" style="font-size:13px;font-weight:600;color:var(--text-dim);"></span>
-          <button onclick="doSignOut()"
-            style="font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'Syne',sans-serif;padding:4px 8px;border-radius:6px;transition:all 0.2s;">Sign
-            out</button>
-        </div>
+      <div id="authBtns" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-pill" onclick="openAuthModal('login')">Log in</button>
+        <button class="nav-cta" onclick="openAuthModal('signup')">Start free →</button>
       </div>
       <div id="userMenu" style="display:none;align-items:center;gap:8px;">
         <div id="navAvatarWrap"
@@ -682,6 +671,16 @@
           style="font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'Syne',sans-serif;padding:4px 8px;border-radius:6px;transition:all 0.2s;">Sign
           out</button>
       </div>
+    </div>
+    <div id="userMenu" style="display:none;align-items:center;gap:8px;">
+      <div id="navAvatarWrap"
+        style="width:26px;height:26px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent2);">
+      </div>
+      <span id="navName" style="font-size:13px;font-weight:600;color:var(--text-dim);"></span>
+      <button onclick="doSignOut()"
+        style="font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'Syne',sans-serif;padding:4px 8px;border-radius:6px;transition:all 0.2s;">Sign
+        out</button>
+    </div>
     </div>
   </nav>
 
@@ -1005,90 +1004,91 @@
             ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
             : (user.displayName?.[0]?.toUpperCase() || '?');
         }
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          showToast('error', '!', 'Sign in failed. Try again.');
+        }
+      }
+    };
   </script>
 
   <script>
-        let authMode = 'signup';
-        window.authMode = authMode;
+    let authMode = 'signup';
+    window.authMode = authMode;
 
-        function openAuthModal(mode) {
-          authMode = mode || 'signup';
-          window.authMode = authMode;
-          const overlay = document.getElementById('authOverlay');
-          overlay.style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-          updateAuthModeUI();
-        }
-
-        function closeAuthModal() {
-          document.getElementById('authOverlay').style.display = 'none';
-          document.body.style.overflow = '';
-        }
-
-        function toggleAuthMode() {
-          authMode = authMode === 'login' ? 'signup' : 'login';
-          window.authMode = authMode;
-          updateAuthModeUI();
-        }
-
-        function updateAuthModeUI() {
-          const title = document.getElementById('authModalTitle');
-          const sub = document.getElementById('authModalSub');
-          const btnText = document.getElementById('googleBtnText');
-          const features = document.getElementById('signupFeatures');
-          const loginNote = document.getElementById('loginNote');
-          const switchText = document.getElementById('authSwitchText');
-          const switchBtn = document.getElementById('authSwitchBtn');
-          if (authMode === 'login') {
-            if (title) title.textContent = 'Welcome back';
-            if (sub) sub.textContent = 'Sign in with your Google account to continue.';
-            if (btnText) btnText.textContent = 'Log in with Google';
-            if (features) features.style.display = 'none';
-            if (loginNote) loginNote.style.display = 'block';
-            if (switchText) switchText.textContent = "Don't have an account?";
-            if (switchBtn) switchBtn.textContent = 'Sign up free';
-          } else {
-            if (title) title.textContent = 'Create your account';
-            if (sub) sub.textContent = 'Sign up with Google, then verify your phone number.';
-            if (btnText) btnText.textContent = 'Continue with Google';
-            if (features) features.style.display = 'flex';
-            if (loginNote) loginNote.style.display = 'none';
-            if (switchText) switchText.textContent = 'Already have an account?';
-            if (switchBtn) switchBtn.textContent = 'Log in';
-          }
-        }
-
-        document.getElementById('authOverlay').addEventListener('click', e => {
-          if (e.target === document.getElementById('authOverlay')) closeAuthModal();
-        });
-
-        let toastTimer;
-        function showToast(type, icon, msg) {
-          const t = document.getElementById('toast');
-          t.className = '';
-          t.style.borderColor = type === 'error' ? 'rgba(255,77,109,0.3)' : 'rgba(0,229,160,0.3)';
-          document.getElementById('toastIcon').textContent = icon;
-          document.getElementById('toastMsg').textContent = msg;
-          t.style.transform = 'translateY(0)';
-          t.style.opacity = '1';
-          clearTimeout(toastTimer);
-          toastTimer = setTimeout(() => { t.style.transform = 'translateY(80px)'; t.style.opacity = '0'; }, 3500);
-        }
-      } catch(err) {
-    if (err.code !== 'auth/popup-closed-by-user') {
-      showToast('error', '!', 'Sign in failed. Try again.');
+    function openAuthModal(mode) {
+      authMode = mode || 'signup';
+      window.authMode = authMode;
+      const overlay = document.getElementById('authOverlay');
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      updateAuthModeUI();
     }
-  }
-};
-        async function doSignOut() {
-          const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
-          const auth = getAuth();
-          await signOut(auth);
-          sessionStorage.removeItem('importrUser');
-          document.getElementById('authBtns').style.display = 'flex';
-          document.getElementById('userMenu').style.display = 'none';
+
+    function closeAuthModal() {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      window.authMode = authMode;
+      updateAuthModeUI();
+    }
+
+    function updateAuthModeUI() {
+      const title = document.getElementById('authModalTitle');
+      const sub = document.getElementById('authModalSub');
+      const btnText = document.getElementById('googleBtnText');
+      const features = document.getElementById('signupFeatures');
+      const loginNote = document.getElementById('loginNote');
+      const switchText = document.getElementById('authSwitchText');
+      const switchBtn = document.getElementById('authSwitchBtn');
+      if (authMode === 'login') {
+        if (title) title.textContent = 'Welcome back';
+        if (sub) sub.textContent = 'Sign in with your Google account to continue.';
+        if (btnText) btnText.textContent = 'Log in with Google';
+        if (features) features.style.display = 'none';
+        if (loginNote) loginNote.style.display = 'block';
+        if (switchText) switchText.textContent = "Don't have an account?";
+        if (switchBtn) switchBtn.textContent = 'Sign up free';
+      } else {
+        if (title) title.textContent = 'Create your account';
+        if (sub) sub.textContent = 'Sign up with Google, then verify your phone number.';
+        if (btnText) btnText.textContent = 'Continue with Google';
+        if (features) features.style.display = 'flex';
+        if (loginNote) loginNote.style.display = 'none';
+        if (switchText) switchText.textContent = 'Already have an account?';
+        if (switchBtn) switchBtn.textContent = 'Log in';
       }
-</script>
+    }
+
+    document.getElementById('authOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('authOverlay')) closeAuthModal();
+    });
+
+    let toastTimer;
+    function showToast(type, icon, msg) {
+      const t = document.getElementById('toast');
+      t.className = '';
+      t.style.borderColor = type === 'error' ? 'rgba(255,77,109,0.3)' : 'rgba(0,229,160,0.3)';
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      t.style.transform = 'translateY(0)';
+      t.style.opacity = '1';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.transform = 'translateY(80px)'; t.style.opacity = '0'; }, 3500);
+    }
+
+    async function doSignOut() {
+      const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+      const auth = getAuth();
+      await signOut(auth);
+      sessionStorage.removeItem('importrUser');
+      document.getElementById('authBtns').style.display = 'flex';
+      document.getElementById('userMenu').style.display = 'none';
+    }
+  </script>
 </body>
 
 </html>
