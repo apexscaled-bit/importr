@@ -840,13 +840,16 @@
         <div id="signupFeatures" style="display:flex;flex-direction:column;gap:8px;">
           <div
             style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
-            <span style="color:var(--green);font-weight:700;">✓</span> 5 free imports included</div>
+            <span style="color:var(--green);font-weight:700;">✓</span> 5 free imports included
+          </div>
           <div
             style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
-            <span style="color:var(--green);font-weight:700;">✓</span> One account per phone number</div>
+            <span style="color:var(--green);font-weight:700;">✓</span> One account per phone number
+          </div>
           <div
             style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
-            <span style="color:var(--green);font-weight:700;">✓</span> No credit card required</div>
+            <span style="color:var(--green);font-weight:700;">✓</span> No credit card required
+          </div>
         </div>
         <div id="loginNote"
           style="display:none;text-align:center;font-size:13px;color:var(--text-muted);padding:8px 0;">Already have an
@@ -884,7 +887,8 @@
         const token = await user.getIdToken();
         sessionStorage.setItem('importrUser', JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, phone: user.phoneNumber, token }));
         // Redirect to homepage where the full app flow continues
-        window.location.href = '/';
+        closeAuthModal();
+        showToast('success', '✓', `Welcome, ${user.displayName?.split(' ')[0]}!`);
       } catch (err) {
         if (err.code !== 'auth/popup-closed-by-user') {
           showToast('error', '!', 'Sign in failed. Try again.');
