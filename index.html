@@ -3395,11 +3395,13 @@
         if (gateAvatarWrap) gateAvatarWrap.innerHTML = user.photoURL ? `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : (user.displayName?.[0]?.toUpperCase() || '?');
         if (gateUserName) gateUserName.textContent = user.displayName || 'Signed in';
         if (gateUserEmail) gateUserEmail.textContent = user.email || '';
-        if (navName) navName.textContent = user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Account';
+        const displayName = user.displayName || user.providerData?.[0]?.displayName || user.email?.split('@')[0] || 'Account';
+        const photoURL = user.photoURL || user.providerData?.[0]?.photoURL || null;
+        if (navName) navName.textContent = displayName.split(' ')[0];
         if (navAvatarWrap) {
-          navAvatarWrap.innerHTML = user.photoURL
-            ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
-            : (user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?');
+          navAvatarWrap.innerHTML = photoURL
+            ? `<img src="${photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
+            : (displayName[0]?.toUpperCase() || '?');
         }
         if (user.phoneNumber) onFullyAuthenticated(window._fbUser);
       }
