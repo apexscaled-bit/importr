@@ -3677,6 +3677,8 @@
         document.getElementById('installGate').style.display = 'none';
         document.getElementById('appUI').style.display = 'block';
         document.getElementById('mobileImportBar').style.display = 'block';
+        const heroSection = document.getElementById('hero');       // ← ADD
+        if (heroSection) heroSection.style.display = 'none';       // ← ADD
         updateShopBadge();
         checkUsage();
       }
