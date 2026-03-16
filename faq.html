@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — Importr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060608; --bg2: #0d0d12; --bg3: #13131a;
+      --surface: #16161f; --surface2: #1c1c27;
+      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
+      --accent: #7c6bff; --accent2: #a594ff;
+      --accent-dim: rgba(124,107,255,0.1);
+      --green: #00e5a0; --green-dim: rgba(0,229,160,0.1);
+      --text: #ededf5; --text-muted: #5a5a72; --text-dim: #8888a8;
+      --r: 12px; --r-sm: 8px; --r-lg: 20px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
+    .ambient { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+    .ambient-1 { width: 600px; height: 600px; background: rgba(124,107,255,0.07); top: -200px; left: 50%; transform: translateX(-50%); }
+    .ambient-2 { width: 400px; height: 400px; background: rgba(0,229,160,0.04); bottom: 100px; right: -100px; }
+    .grid-lines { position: fixed; inset: 0; background-image: linear-gradient(rgba(124,107,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(124,107,255,0.025) 1px, transparent 1px); background-size: 64px 64px; pointer-events: none; z-index: 0; }
+
+    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 68px; background: rgba(6,6,8,0.92); backdrop-filter: blur(24px); border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+    .logo-mark { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), #b8acff); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(124,107,255,0.4); }
+    .logo-mark svg { width: 18px; height: 18px; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link { padding: 7px 14px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: all 0.2s; text-decoration: none; }
+    .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-link.active { color: var(--accent2); background: rgba(255,255,255,0.05); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-pill { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--surface); border: 1px solid var(--border2); border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--text-dim); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .nav-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-cta { display: flex; align-items: center; gap: 8px; padding: 8px 18px; background: var(--accent); border: none; border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.2s; text-decoration: none; box-shadow: 0 4px 20px rgba(124,107,255,0.35); }
+    .nav-cta:hover { background: var(--accent2); transform: translateY(-1px); }
+
+    .page-header { position: relative; z-index: 1; text-align: center; padding: 80px 32px 64px; max-width: 800px; margin: 0 auto; }
+    .section-label { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; background: var(--accent-dim); border: 1px solid rgba(124,107,255,0.2); border-radius: 100px; font-size: 11px; font-weight: 700; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 5vw, 60px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .page-title em { font-style: italic; background: linear-gradient(135deg, var(--accent2), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .page-sub { font-size: 17px; color: var(--text-muted); line-height: 1.65; }
+
+    .content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 0 32px 100px; }
+
+    /* FAQ */
+    .faq-section { margin-bottom: 48px; }
+    .faq-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border2); }
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
+    .faq-item:hover { border-color: var(--border2); }
+    .faq-item.open { border-color: rgba(124,107,255,0.3); }
+    .faq-q { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .faq-chevron { color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--accent); }
+    .faq-a { display: none; padding: 0 24px 20px; font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+    .faq-a a { color: var(--accent2); text-decoration: underline; }
+    .faq-item.open .faq-a { display: block; }
+
+    /* STILL HAVE QUESTIONS */
+    .contact-box { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-lg); padding: 40px; text-align: center; margin-top: 48px; }
+    .contact-icon { font-size: 36px; margin-bottom: 16px; }
+    .contact-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .contact-sub { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+    .cta-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; background: var(--accent); color: #fff; border: none; border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-ghost-link { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; color: var(--text-dim); border: 1px solid var(--border2); border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-ghost-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    footer { border-top: 1px solid var(--border); position: relative; z-index: 1; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; padding: 40px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .footer-copy { font-size: 13px; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+    .footer-link { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: var(--text); }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .page-header { padding: 48px 20px 40px; }
+      .content { padding: 0 20px 80px; }
+      .faq-q { font-size: 14px; padding: 16px 18px; }
+      .faq-a { padding: 0 18px 16px; }
+      .footer-inner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+<div class="grid-lines"></div>
+
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </div>
+    <span class="logo-text">Importr</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/how-it-works">How It Works</a>
+    <a class="nav-link" href="/features">Features</a>
+    <a class="nav-link" href="/pricing">Pricing</a>
+    <a class="nav-link active" href="/faq">FAQ</a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-pill" href="/">Log in</a>
+    <a class="nav-cta" href="/">Start free →</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="section-label">FAQ</div>
+  <h1 class="page-title">Common<br><em>questions</em></h1>
+  <p class="page-sub">Everything you need to know about Importr. Can't find what you're looking for? Reach out.</p>
+</div>
+
+<div class="content">
+
+  <!-- GETTING STARTED -->
+  <div class="faq-section">
+    <div class="faq-section-title">Getting started</div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">How do I get started with Importr?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Sign up with your Google account, verify your phone number, then connect your Shopify store via OAuth. Once connected, paste any Amazon product URL to import your first product. The whole setup takes under two minutes.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Do I need a credit card to sign up?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">No. The free plan includes 5 product imports with no credit card required. You only need to add payment details when you choose to upgrade to Pro or Business.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Which Shopify plans does Importr work with?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Importr works with all Shopify plans — Basic, Shopify, Advanced, and Plus. You just need a store with product write access enabled, which is included in all plans by default.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I connect multiple Shopify stores?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Currently one store per account. Multi-store support is on the roadmap for the Business plan. If this is important to you, let us know.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORTING -->
+  <div class="faq-section">
+    <div class="faq-section-title">Importing products</div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Which Amazon marketplaces are supported?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Importr supports amazon.com, amazon.co.uk, amazon.de, amazon.ca, amazon.com.au, amazon.fr, amazon.it, amazon.co.jp, and more. Just paste the product URL from any supported Amazon site and Importr detects the marketplace automatically.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What product categories can I import?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Any publicly listed Amazon product across all categories — electronics, fashion, home goods, beauty, sports, toys, books and more. If it has a product page on Amazon, Importr can import it.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Does Importr import product variants?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Currently Importr imports the main product listing. Full variant support (sizes, colors etc.) is coming in a future update.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I edit the product before it goes live?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Yes. Before anything is pushed to your store you see a review screen where you can set your sale price, compare-at price, override the title, and add tags. You're always in control.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI & COPY -->
+  <div class="faq-section">
+    <div class="faq-section-title">AI-generated content</div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">How does the AI-written copy work?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Importr fetches the product data from Amazon and passes it to our AI model which rewrites the title, description, and tags specifically for Shopify. The output is conversion-focused copy rather than Amazon SEO-stuffed text.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What exactly gets rewritten by AI?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">The product title, full description, SEO page title, meta description, and product tags are all AI-generated. Images and pricing data come directly from Amazon and are not altered.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I edit the AI copy after importing?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Yes — once the product is in your Shopify store you can edit it like any other product from your Shopify admin. The AI copy is a starting point, not locked in.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGAL & BUSINESS -->
+  <div class="faq-section">
+    <div class="faq-section-title">Legal & business</div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Is it legal to resell Amazon products?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Reselling products is legal and is standard practice in dropshipping and retail arbitrage. You are sourcing products available for public purchase and reselling them at your own price. You are responsible for your own compliance with supplier terms and local regulations.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Does Importr handle fulfillment or shipping?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">No — Importr handles product listing only. Order fulfillment is your responsibility and is managed through your chosen supplier. Many users fulfill via Amazon, AliExpress, or a private wholesale supplier.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Are images from Amazon copyright-free to use?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Product images are typically owned by the manufacturer or brand. If you are an authorized reseller of the product, using manufacturer images is generally accepted practice. We recommend verifying with your specific supplier. Importr is not a legal advisor.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT -->
+  <div class="faq-section">
+    <div class="faq-section-title">Account & billing</div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What happens when I hit my 5 free imports?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">You'll be prompted to upgrade to a paid plan. Your existing 5 imported products remain live in your Shopify store — nothing is removed. You just need to upgrade to continue importing new ones.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I cancel my subscription anytime?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Yes. Cancel anytime with no fees. You keep access until the end of your billing period. After cancellation you revert to the free plan — all your existing imported products stay live in Shopify.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Why is phone verification required?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Phone verification prevents abuse of the free plan. Each phone number can only be used for one Importr account, which keeps the free tier fair for everyone.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STILL HAVE QUESTIONS -->
+  <div class="contact-box">
+    <div class="contact-icon">💬</div>
+    <div class="contact-title">Still have questions?</div>
+    <div class="contact-sub">Can't find what you're looking for? We're happy to help — reach out and we'll get back to you.</div>
+    <div class="cta-actions">
+      <a class="btn-primary" href="/">Get started free →</a>
+      <a class="btn-ghost-link" href="/pricing">See pricing</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <a href="/" style="text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px;">
+      <div class="logo-mark" style="width:28px;height:28px;border-radius:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </div>
+      <span style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Importr</span>
+    </a>
+    <div class="footer-copy">© 2026 Importr. All rights reserved.</div>
+    <div class="footer-links">
+      <a class="footer-link" href="/how-it-works">How It Works</a>
+      <a class="footer-link" href="/features">Features</a>
+      <a class="footer-link" href="/pricing">Pricing</a>
+      <a class="footer-link" href="/faq">FAQ</a>
+      <a class="footer-link" href="#">Terms</a>
+      <a class="footer-link" href="#">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
