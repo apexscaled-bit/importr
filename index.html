@@ -2645,6 +2645,176 @@
       max-width: 520px;
       margin: 0 auto;
     }
+
+    /* ── FLOATING SIDE ELEMENTS ── */
+    .float-side {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 220px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .float-side.left {
+      left: 0;
+    }
+
+    .float-side.right {
+      right: 0;
+    }
+
+    .float-card {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      opacity: 0;
+      animation: floatUp 12s ease-in-out infinite;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .float-card .fc-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .float-card .fc-badge {
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+
+      10% {
+        opacity: 0.7;
+      }
+
+      80% {
+        opacity: 0.7;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-600px);
+      }
+    }
+
+    /* Stagger each card */
+    .float-card:nth-child(1) {
+      animation-delay: 0s;
+      left: 20px;
+    }
+
+    .float-card:nth-child(2) {
+      animation-delay: 3s;
+      left: 40px;
+    }
+
+    .float-card:nth-child(3) {
+      animation-delay: 6s;
+      left: 15px;
+    }
+
+    .float-card:nth-child(4) {
+      animation-delay: 9s;
+      left: 35px;
+    }
+
+    .float-side.right .float-card:nth-child(1) {
+      left: auto;
+      right: 20px;
+      animation-delay: 1.5s;
+    }
+
+    .float-side.right .float-card:nth-child(2) {
+      left: auto;
+      right: 40px;
+      animation-delay: 4.5s;
+    }
+
+    .float-side.right .float-card:nth-child(3) {
+      left: auto;
+      right: 15px;
+      animation-delay: 7.5s;
+    }
+
+    .float-side.right .float-card:nth-child(4) {
+      left: auto;
+      right: 35px;
+      animation-delay: 10.5s;
+    }
+
+    /* Animated corner glow lines */
+    .corner-line {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.15;
+    }
+
+    .corner-line.tl {
+      top: 68px;
+      left: 0;
+      width: 200px;
+      height: 200px;
+      border-right: 1px solid var(--accent);
+      border-bottom: 1px solid var(--accent);
+      border-radius: 0 0 var(--r-lg) 0;
+      animation: cornerPulse 4s ease-in-out infinite;
+    }
+
+    .corner-line.br {
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      border-left: 1px solid var(--accent);
+      border-top: 1px solid var(--accent);
+      border-radius: var(--r-lg) 0 0 0;
+      animation: cornerPulse 4s ease-in-out infinite 2s;
+    }
+
+    @keyframes cornerPulse {
+
+      0%,
+      100% {
+        opacity: 0.1;
+      }
+
+      50% {
+        opacity: 0.25;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .float-side {
+        display: none;
+      }
+
+      .corner-line {
+        display: none;
+      }
+    }
   </style>
 </head>
 
