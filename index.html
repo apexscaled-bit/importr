@@ -1945,7 +1945,7 @@
                 oninput="formatPhone(this)" onkeydown="if(event.key==='Enter') sendSmsCode()" />
             </div>
             <div class="auth-error" id="phoneError" style="display:none;"></div>
-            <div class="auth-hint">Max 2 accounts per phone number.</div>
+            <div class="auth-hint">One account per phone number.</div>
           </div>
           <button class="auth-btn-primary" onclick="sendSmsCode()">Send Verification Code →</button>
         </div>
@@ -2001,7 +2001,7 @@
   <!-- FIREBASE SDK -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut as fbSignOut, linkWithPhoneNumber } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut as fbSignOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyD-y6vl2ahHu_gEx0XhiDgsQ6BOye6Hge0",
@@ -2019,19 +2019,16 @@
     let confirmationResult = null;
     let googleUserTemp = null;
 
-    // Auth state listener
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const token = await user.getIdToken();
         window._fbUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, phone: user.phoneNumber, token };
-        // Only fully authenticated if they have a phone number
         if (user.phoneNumber) {
           onFullyAuthenticated(window._fbUser);
         }
       }
     });
 
-    // Step 1: Google sign in
     window.startGoogleSignIn = async function () {
       try {
         showAuthStep('loading', 'Connecting to Google...');
@@ -2039,7 +2036,6 @@
         const result = await signInWithPopup(auth, provider);
         googleUserTemp = result.user;
 
-        // Update avatar in phone step
         const avatarEl = document.getElementById('authUserAvatar');
         if (avatarEl) {
           avatarEl.innerHTML = googleUserTemp.photoURL
@@ -2049,7 +2045,6 @@
 
         const t = await googleUserTemp.getIdToken();
 
-        // LOGIN MODE: skip phone, just sign in directly
         if (window.authMode === 'login') {
           onFullyAuthenticated({ uid: googleUserTemp.uid, name: googleUserTemp.displayName, email: googleUserTemp.email, picture: googleUserTemp.photoURL, phone: googleUserTemp.phoneNumber || null, token: t });
           closeAuthModal();
@@ -2057,14 +2052,12 @@
           return;
         }
 
-        // SIGNUP MODE: if already has phone verified, done
         if (googleUserTemp.phoneNumber) {
           onFullyAuthenticated({ uid: googleUserTemp.uid, name: googleUserTemp.displayName, email: googleUserTemp.email, picture: googleUserTemp.photoURL, phone: googleUserTemp.phoneNumber, token: t });
           closeAuthModal();
           return;
         }
 
-        // SIGNUP MODE: need phone verification
         showAuthStep('phone');
       } catch (err) {
         if (err.code !== 'auth/popup-closed-by-user') {
@@ -2075,11 +2068,10 @@
       }
     };
 
-    // Step 2: Send SMS
     window.sendSmsCode = async function () {
       const raw = document.getElementById('phoneInput').value.trim();
       if (!raw) { showFieldError('phoneError', 'Enter your phone number'); return; }
-      let phone = '+1' + raw.replace(/\D/g, '');
+      const phone = '+1' + raw.replace(/\D/g, '');
 
       showAuthStep('loading', 'Sending verification code...');
 
@@ -2092,11 +2084,10 @@
         const checkData = await check.json();
         if (checkData.blocked) {
           showAuthStep('phone');
-          showFieldError('phoneError', 'This number has reached the 2-account limit.');
+          showFieldError('phoneError', 'This number is already linked to an account.');
           return;
         }
 
-        // Always reset recaptcha before each attempt
         if (window._recaptcha) {
           try { window._recaptcha.clear(); } catch (e) { }
           window._recaptcha = null;
@@ -2118,47 +2109,12 @@
       }
     };
 
-    // Skip reCAPTCHA for test numbers, use it for real ones
-    const TEST_PHONES = ['+14084392507'];
-    let appVerifier = null;
-
-    if (!TEST_PHONES.includes(phone)) {
-      if (window._recaptcha) {
-        try { window._recaptcha.clear(); } catch (e) { }
-      }
-      window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => { }
-      });
-      await window._recaptcha.render();
-      appVerifier = window._recaptcha;
-    }
-
-    if (!window._recaptcha) {
-      window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => { }
-      });
-      await window._recaptcha.render();
-    }
-    confirmationResult = await signInWithPhoneNumber(auth, phone, window._recaptcha);
-    document.getElementById('otpSentTo').textContent = phone;
-    showAuthStep('otp');
-      } catch (err) {
-      window._recaptcha = null;
-      showAuthStep('phone');
-      console.error('Firebase phone error:', err.code, err.message);
-    }
-    };
-
-    // Step 3: Verify OTP
     window.verifyOtp = async function () {
       const code = document.getElementById('otpInput').value.trim();
       if (code.length !== 6) { showFieldError('otpError', 'Enter the 6-digit code'); return; }
       showAuthStep('loading', 'Verifying...');
       try {
         const result = await confirmationResult.confirm(code);
-        // Register phone in Supabase
         await fetch('/api/check-phone', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2169,15 +2125,12 @@
             action: 'register'
           })
         });
-        // onAuthStateChanged fires → onFullyAuthenticated called
-
       } catch (err) {
         showAuthStep('otp');
         showFieldError('otpError', getFirebaseError(err.code) || 'Invalid code.');
       }
     };
 
-    // Sign out
     window.doSignOut = async function () {
       await fbSignOut(auth);
       window._fbUser = null;
