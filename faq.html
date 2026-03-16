@@ -870,7 +870,21 @@
 
     const app = initializeApp({ apiKey: "AIzaSyD-y6vl2ahHu_gEx0XhiDgsQ6BOye6Hge0", authDomain: "importr-b4f68.firebaseapp.com", projectId: "importr-b4f68", storageBucket: "importr-b4f68.firebasestorage.app", messagingSenderId: "971241906166", appId: "1:971241906166:web:ccd8a2cedc0fad6f6bf1d7" });
     const auth = getAuth(app);
-
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('authBtns').style.display = 'none';
+        const userMenu = document.getElementById('userMenu');
+        userMenu.style.display = 'flex';
+        const navName = document.getElementById('navName');
+        if (navName) navName.textContent = user.displayName?.split(' ')[0] || 'Account';
+        const navAvatarWrap = document.getElementById('navAvatarWrap');
+        if (navAvatarWrap) {
+          navAvatarWrap.innerHTML = user.photoURL
+            ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
+            : (user.displayName?.[0]?.toUpperCase() || '?');
+        }
+      }
+    });
     window.startGoogleSignIn = async function () {
       try {
         const provider = new GoogleAuthProvider();
@@ -878,15 +892,25 @@
         const user = result.user;
         const token = await user.getIdToken();
         sessionStorage.setItem('importrUser', JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, phone: user.phoneNumber, token }));
-        // Redirect to homepage where the full app flow continues
         closeAuthModal();
         showToast('success', '✓', `Welcome, ${user.displayName?.split(' ')[0]}!`);
+        document.getElementById('authBtns').style.display = 'none';
+        document.getElementById('userMenu').style.display = 'flex';
+        const navName = document.getElementById('navName');
+        if (navName) navName.textContent = user.displayName?.split(' ')[0] || 'Account';
+        const navAvatarWrap = document.getElementById('navAvatarWrap');
+        if (navAvatarWrap) {
+          navAvatarWrap.innerHTML = user.photoURL
+            ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
+            : (user.displayName?.[0]?.toUpperCase() || '?');
+        }
       } catch (err) {
         if (err.code !== 'auth/popup-closed-by-user') {
           showToast('error', '!', 'Sign in failed. Try again.');
         }
       }
     };
+
   </script>
 
   <script>
@@ -955,6 +979,14 @@
       t.style.opacity = '1';
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => { t.style.transform = 'translateY(80px)'; t.style.opacity = '0'; }, 3500);
+    }
+    async function doSignOut() {
+      const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+      const auth = getAuth();
+      await signOut(auth);
+      sessionStorage.removeItem('importrUser');
+      document.getElementById('authBtns').style.display = 'flex';
+      document.getElementById('userMenu').style.display = 'none';
     }
   </script>
 </body>
