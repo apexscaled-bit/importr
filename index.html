@@ -2525,6 +2525,92 @@
       background: rgba(255, 255, 255, 0.08);
       border-radius: 3px;
     }
+
+    /* ── HERO URL BAR ── */
+    .hero-url-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 100px;
+      padding: 6px 6px 6px 22px;
+      max-width: 580px;
+      margin: 0 auto;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(124, 107, 255, 0.1);
+      transition: all 0.2s;
+    }
+
+    .hero-url-inner:focus-within {
+      border-color: rgba(124, 107, 255, 0.5);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(124, 107, 255, 0.1);
+    }
+
+    .hero-url-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      min-width: 0;
+    }
+
+    .hero-url-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .hero-url-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(124, 107, 255, 0.4);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .hero-url-btn:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .hero-url-chips {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-url-chip {
+      padding: 5px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border2);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .hero-url-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
   </style>
 </head>
 
@@ -2636,6 +2722,28 @@
         <div class="hero-stat"><span class="hero-stat-num">AI</span><span>writes your copy</span></div>
         <div class="hero-stat-div"></div>
         <div class="hero-stat"><span class="hero-stat-num">30s</span><span>to go live</span></div>
+      </div>
+
+      <!-- HERO URL BAR -->
+      <div class="hero-url-bar" style="margin-top:32px;animation:fadeUp 0.6s 0.25s ease both;">
+        <div class="hero-url-inner">
+          <input class="hero-url-input" id="heroUrlInput" type="text" placeholder="Paste any Amazon product link..."
+            onkeydown="if(event.key==='Enter') heroBarAction()" />
+          <button class="hero-url-btn" onclick="heroBarAction()">
+            Import it free
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        <div class="hero-url-chips">
+          <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B08N5WRWNW')">🎧 Echo Dot</span>
+          <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B07ZPKBL9V')">⌚ Fitbit</span>
+          <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B08BHXG144')">💡 Smart Bulb</span>
+          <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B09G9HD6PD')">📱 Phone Stand</span>
+        </div>
       </div>
 
       <!-- GATE CARD (connect store) -->
@@ -3164,7 +3272,8 @@
           </div>
         </div>
         <div class="auth-footer">By continuing you agree to our <a href="#" style="color:var(--accent2);">Terms</a> and
-          <a href="#" style="color:var(--accent2);">Privacy Policy</a>.</div>
+          <a href="#" style="color:var(--accent2);">Privacy Policy</a>.
+        </div>
       </div>
       <div class="auth-step" id="step-phone" style="display:none;">
         <div class="auth-modal-top">
@@ -3480,6 +3589,14 @@
       document.getElementById('installGate').style.display = 'block';
       closeAuthModal();
 
+      // Auto-fill import input if user came from hero bar
+      const pending = sessionStorage.getItem('pendingHeroUrl');
+      if (pending) {
+        const urlInput = document.getElementById('urlInput');
+        if (urlInput) urlInput.value = pending;
+        sessionStorage.removeItem('pendingHeroUrl');
+      }
+      
       if (shop && token) {
         document.getElementById('installGate').style.display = 'none';
         document.getElementById('appUI').style.display = 'block';
@@ -3751,6 +3868,25 @@
     document.getElementById('shopInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') installApp(); });
 
     init();
+    function setHeroUrl(url) {
+      const input = document.getElementById('heroUrlInput');
+      if (input) { input.value = url; input.focus(); }
+    }
+
+    function heroBarAction() {
+      const url = document.getElementById('heroUrlInput')?.value.trim();
+      if (url) sessionStorage.setItem('pendingHeroUrl', url);
+
+      if (shop && token) {
+        // Already connected — copy to import input and scroll to app
+        const urlInput = document.getElementById('urlInput');
+        if (urlInput) urlInput.value = url || '';
+        document.getElementById('appUI')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Not connected — open signup modal
+        openAuthModal('signup');
+      }
+    }
   </script>
 </body>
 
