@@ -1,255 +1,966 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — Importr</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      --bg: #060608; --bg2: #0d0d12; --bg3: #13131a;
-      --surface: #16161f; --surface2: #1c1c27;
-      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
-      --accent: #7c6bff; --accent2: #a594ff;
-      --accent-dim: rgba(124,107,255,0.1);
-      --green: #00e5a0; --green-dim: rgba(0,229,160,0.1);
-      --text: #ededf5; --text-muted: #5a5a72; --text-dim: #8888a8;
-      --r: 12px; --r-sm: 8px; --r-lg: 20px;
+      --bg: #060608;
+      --bg2: #0d0d12;
+      --bg3: #13131a;
+      --surface: #16161f;
+      --surface2: #1c1c27;
+      --border: rgba(255, 255, 255, 0.06);
+      --border2: rgba(255, 255, 255, 0.1);
+      --accent: #7c6bff;
+      --accent2: #a594ff;
+      --accent-dim: rgba(124, 107, 255, 0.1);
+      --green: #00e5a0;
+      --green-dim: rgba(0, 229, 160, 0.1);
+      --text: #ededf5;
+      --text-muted: #5a5a72;
+      --text-dim: #8888a8;
+      --r: 12px;
+      --r-sm: 8px;
+      --r-lg: 20px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-    body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
-    .ambient { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
-    .ambient-1 { width: 600px; height: 600px; background: rgba(124,107,255,0.07); top: -200px; left: 50%; transform: translateX(-50%); }
-    .ambient-2 { width: 400px; height: 400px; background: rgba(0,229,160,0.04); bottom: 100px; right: -100px; }
-    .grid-lines { position: fixed; inset: 0; background-image: linear-gradient(rgba(124,107,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(124,107,255,0.025) 1px, transparent 1px); background-size: 64px 64px; pointer-events: none; z-index: 0; }
 
-    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 68px; background: rgba(6,6,8,0.92); backdrop-filter: blur(24px); border-bottom: 1px solid var(--border); }
-    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
-    .logo-mark { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), #b8acff); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(124,107,255,0.4); }
-    .logo-mark svg { width: 18px; height: 18px; }
-    .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
-    .nav-links { display: flex; align-items: center; gap: 4px; }
-    .nav-link { padding: 7px 14px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: all 0.2s; text-decoration: none; }
-    .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-    .nav-link.active { color: var(--accent2); background: rgba(255,255,255,0.05); }
-    .nav-right { display: flex; align-items: center; gap: 12px; }
-    .nav-pill { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--surface); border: 1px solid var(--border2); border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--text-dim); cursor: pointer; transition: all 0.2s; text-decoration: none; }
-    .nav-pill:hover { border-color: var(--accent); color: var(--accent); }
-    .nav-cta { display: flex; align-items: center; gap: 8px; padding: 8px 18px; background: var(--accent); border: none; border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.2s; text-decoration: none; box-shadow: 0 4px 20px rgba(124,107,255,0.35); }
-    .nav-cta:hover { background: var(--accent2); transform: translateY(-1px); }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    .page-header { position: relative; z-index: 1; text-align: center; padding: 80px 32px 64px; max-width: 1100px; margin: 0 auto; }
-    .section-label { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; background: var(--accent-dim); border: 1px solid rgba(124,107,255,0.2); border-radius: 100px; font-size: 11px; font-weight: 700; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; }
-    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 5vw, 60px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
-    .page-title em { font-style: italic; background: linear-gradient(135deg, var(--accent2), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .page-sub { font-size: 17px; color: var(--text-muted); line-height: 1.65; max-width: 520px; margin: 0 auto 32px; }
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-    .content { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 32px 100px; }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    .ambient {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-1 {
+      width: 600px;
+      height: 600px;
+      background: rgba(124, 107, 255, 0.07);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .ambient-2 {
+      width: 400px;
+      height: 400px;
+      background: rgba(0, 229, 160, 0.04);
+      bottom: 100px;
+      right: -100px;
+    }
+
+    .grid-lines {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(124, 107, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 107, 255, 0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 68px;
+      background: rgba(6, 6, 8, 0.92);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #b8acff);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(124, 107, 255, 0.4);
+    }
+
+    .logo-mark svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-link {
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-link.active {
+      color: var(--accent2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(124, 107, 255, 0.35);
+    }
+
+    .nav-cta:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .page-header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 80px 32px 64px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(124, 107, 255, 0.2);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent2);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .page-title em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--accent2), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px 100px;
+    }
 
     /* PRICING CARDS */
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .pricing-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-lg); padding: 36px; text-align: center; position: relative; transition: all 0.2s; }
-    .pricing-card:hover { transform: translateY(-4px); }
-    .pricing-card.featured { border-color: rgba(124,107,255,0.4); box-shadow: 0 0 40px rgba(124,107,255,0.12); }
-    .pricing-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 14px; border-radius: 100px; letter-spacing: 0.08em; white-space: nowrap; }
-    .pricing-name { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px; }
-    .pricing-price { font-family: 'Playfair Display', serif; font-size: 60px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
-    .pricing-price sup { font-size: 24px; vertical-align: super; }
-    .pricing-per { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
-    .pricing-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
-    .pricing-features { list-style: none; text-align: left; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
-    .pricing-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-    .check { color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-    .cross { color: var(--text-muted); opacity: 0.35; flex-shrink: 0; margin-top: 1px; }
-    .pricing-btn { width: 100%; padding: 14px; border: none; border-radius: var(--r-sm); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; text-decoration: none; display: block; }
-    .pricing-btn.primary { background: var(--accent); color: #fff; box-shadow: 0 4px 20px rgba(124,107,255,0.3); }
-    .pricing-btn.primary:hover { background: var(--accent2); }
-    .pricing-btn.ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border2); }
-    .pricing-btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-lg);
+      padding: 36px;
+      text-align: center;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .pricing-card.featured {
+      border-color: rgba(124, 107, 255, 0.4);
+      box-shadow: 0 0 40px rgba(124, 107, 255, 0.12);
+    }
+
+    .pricing-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .pricing-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .pricing-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 60px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .pricing-price sup {
+      font-size: 24px;
+      vertical-align: super;
+    }
+
+    .pricing-per {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .pricing-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 24px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .check {
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .cross {
+      color: var(--text-muted);
+      opacity: 0.35;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .pricing-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--r-sm);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      display: block;
+    }
+
+    .pricing-btn.primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 107, 255, 0.3);
+    }
+
+    .pricing-btn.primary:hover {
+      background: var(--accent2);
+    }
+
+    .pricing-btn.ghost {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border2);
+    }
+
+    .pricing-btn.ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
     /* FAQ TEASER */
-    .faq-teaser { margin-top: 64px; }
-    .faq-teaser-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 32px; }
-    .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
-    .faq-item:hover { border-color: var(--border2); }
-    .faq-item.open { border-color: rgba(124,107,255,0.3); }
-    .faq-q { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; font-size: 14px; font-weight: 600; color: var(--text); }
-    .faq-chevron { color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
-    .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--accent); }
-    .faq-a { display: none; padding: 0 20px 18px; font-size: 14px; color: var(--text-muted); line-height: 1.7; }
-    .faq-item.open .faq-a { display: block; }
+    .faq-teaser {
+      margin-top: 64px;
+    }
 
-    .cta-strip { background: linear-gradient(135deg, rgba(124,107,255,0.1), rgba(0,229,160,0.05)); border: 1px solid rgba(124,107,255,0.2); border-radius: var(--r-lg); padding: 48px; text-align: center; margin-top: 64px; }
-    .cta-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 12px; }
-    .cta-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
-    .cta-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-    .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; background: var(--accent); color: #fff; border: none; border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
-    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-    .btn-ghost-link { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; color: var(--text-dim); border: 1px solid var(--border2); border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
-    .btn-ghost-link:hover { border-color: var(--accent); color: var(--accent); }
+    .faq-teaser-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 32px;
+    }
 
-    footer { border-top: 1px solid var(--border); position: relative; z-index: 1; }
-    .footer-inner { max-width: 1100px; margin: 0 auto; padding: 40px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
-    .footer-copy { font-size: 13px; color: var(--text-muted); }
-    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
-    .footer-link { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
-    .footer-link:hover { color: var(--text); }
+    .faq-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .faq-item:hover {
+      border-color: var(--border2);
+    }
+
+    .faq-item.open {
+      border-color: rgba(124, 107, 255, 0.3);
+    }
+
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .faq-chevron {
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+      color: var(--accent);
+    }
+
+    .faq-a {
+      display: none;
+      padding: 0 20px 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .faq-item.open .faq-a {
+      display: block;
+    }
+
+    .cta-strip {
+      background: linear-gradient(135deg, rgba(124, 107, 255, 0.1), rgba(0, 229, 160, 0.05));
+      border: 1px solid rgba(124, 107, 255, 0.2);
+      border-radius: var(--r-lg);
+      padding: 48px;
+      text-align: center;
+      margin-top: 64px;
+    }
+
+    .cta-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .cta-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .cta-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      color: var(--text-dim);
+      border: 1px solid var(--border2);
+      border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover {
+      color: var(--text);
+    }
 
     @media (max-width: 768px) {
-      nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .page-header { padding: 48px 20px 40px; }
-      .content { padding: 0 20px 80px; }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .faq-grid { grid-template-columns: 1fr; }
-      .footer-inner { flex-direction: column; }
+      nav {
+        padding: 0 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .page-header {
+        padding: 48px 20px 40px;
+      }
+
+      .content {
+        padding: 0 20px 80px;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .faq-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
+
 <body>
-<div class="ambient ambient-1"></div>
-<div class="ambient ambient-2"></div>
-<div class="grid-lines"></div>
+  <div class="ambient ambient-1"></div>
+  <div class="ambient ambient-2"></div>
+  <div class="grid-lines"></div>
 
-<nav>
-  <a href="/" class="logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    </div>
-    <span class="logo-text">Importr</span>
-  </a>
-  <div class="nav-links">
-    <a class="nav-link" href="/how-it-works">How It Works</a>
-    <a class="nav-link" href="/features">Features</a>
-    <a class="nav-link active" href="/pricing">Pricing</a>
-    <a class="nav-link" href="/faq">FAQ</a>
-  </div>
-  <div class="nav-right">
-    <a class="nav-pill" href="/">Log in</a>
-    <a class="nav-cta" href="/">Start free →</a>
-  </div>
-</nav>
-
-<div class="page-header">
-  <div class="section-label">Pricing</div>
-  <h1 class="page-title">Simple,<br><em>transparent pricing</em></h1>
-  <p class="page-sub">Start for free with 5 imports. Upgrade when you're ready to scale — no long-term contracts.</p>
-</div>
-
-<div class="content">
-  <div class="pricing-grid">
-
-    <div class="pricing-card">
-      <div class="pricing-name">Free</div>
-      <div class="pricing-price"><sup>$</sup>0</div>
-      <div class="pricing-per">forever</div>
-      <div class="pricing-divider"></div>
-      <ul class="pricing-features">
-        <li><span class="check">✓</span> 5 product imports</li>
-        <li><span class="check">✓</span> AI-written descriptions</li>
-        <li><span class="check">✓</span> Automatic image import</li>
-        <li><span class="check">✓</span> Margin calculator</li>
-        <li><span class="check">✓</span> All Amazon marketplaces</li>
-        <li><span class="cross">✕</span> Unlimited imports</li>
-        <li><span class="cross">✕</span> Bulk import</li>
-        <li><span class="cross">✕</span> Analytics dashboard</li>
-        <li><span class="cross">✕</span> Priority support</li>
-      </ul>
-      <a class="pricing-btn ghost" href="/">Get started free</a>
-    </div>
-
-    <div class="pricing-card featured">
-      <div class="pricing-name">Pro</div>
-      <div class="pricing-price"><sup>$</sup>19</div>
-      <div class="pricing-per">/month · billed monthly</div>
-      <div class="pricing-divider"></div>
-      <ul class="pricing-features">
-        <li><span class="check">✓</span> Unlimited imports</li>
-        <li><span class="check">✓</span> AI-written descriptions</li>
-        <li><span class="check">✓</span> Automatic image import</li>
-        <li><span class="check">✓</span> Margin calculator</li>
-        <li><span class="check">✓</span> All Amazon marketplaces</li>
-        <li><span class="check">✓</span> Priority support</li>
-        <li><span class="cross">✕</span> Bulk import</li>
-        <li><span class="cross">✕</span> Analytics dashboard</li>
-      </ul>
-      <a class="pricing-btn primary" href="/">Get Pro →</a>
-    </div>
-
-    <div class="pricing-card">
-      <div class="pricing-name">Business</div>
-      <div class="pricing-price"><sup>$</sup>49</div>
-      <div class="pricing-per">/month · billed monthly</div>
-      <div class="pricing-divider"></div>
-      <ul class="pricing-features">
-        <li><span class="check">✓</span> Unlimited imports</li>
-        <li><span class="check">✓</span> AI-written descriptions</li>
-        <li><span class="check">✓</span> Automatic image import</li>
-        <li><span class="check">✓</span> Margin calculator</li>
-        <li><span class="check">✓</span> All Amazon marketplaces</li>
-        <li><span class="check">✓</span> Priority support</li>
-        <li><span class="check">✓</span> Bulk import</li>
-        <li><span class="check">✓</span> Analytics dashboard</li>
-      </ul>
-      <a class="pricing-btn primary" href="/">Get Business →</a>
-    </div>
-
-  </div>
-
-  <!-- FAQ TEASER -->
-  <div class="faq-teaser">
-    <div class="faq-teaser-title">Pricing questions</div>
-    <div class="faq-grid">
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Can I cancel anytime?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Yes — cancel anytime from your account. You keep access until the end of your billing period. No cancellation fees.</div>
+  <nav>
+    <a href="/" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
       </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">What happens to my products if I downgrade?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">All products already imported into your Shopify store remain live. You just won't be able to import new ones until you upgrade again.</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Is there a free trial for paid plans?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">The free plan includes 5 imports so you can test the full product before paying. No time limit on the free plan.</div>
-      </div>
-      <div class="faq-item" onclick="this.classList.toggle('open')">
-        <div class="faq-q">Do you charge per import on paid plans?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">No. Pro and Business plans include unlimited imports — no per-import charges, no surprises.</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="cta-strip">
-    <div class="cta-title">Start importing today</div>
-    <div class="cta-sub">5 free imports. No credit card. Cancel anytime.</div>
-    <div class="cta-actions">
-      <a class="btn-primary" href="/">Get started free →</a>
-      <a class="btn-ghost-link" href="/faq">More questions? See FAQ</a>
-    </div>
-  </div>
-</div>
-
-<footer>
-  <div class="footer-inner">
-    <a href="/" style="text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px;">
-      <div class="logo-mark" style="width:28px;height:28px;border-radius:8px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      </div>
-      <span style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Importr</span>
+      <span class="logo-text">Importr</span>
     </a>
-    <div class="footer-copy">© 2026 Importr. All rights reserved.</div>
-    <div class="footer-links">
-      <a class="footer-link" href="/how-it-works">How It Works</a>
-      <a class="footer-link" href="/features">Features</a>
-      <a class="footer-link" href="/pricing">Pricing</a>
-      <a class="footer-link" href="/faq">FAQ</a>
-      <a class="footer-link" href="#">Terms</a>
-      <a class="footer-link" href="#">Privacy</a>
+    <div class="nav-links">
+      <a class="nav-link" href="/how-it-works">How It Works</a>
+      <a class="nav-link" href="/features">Features</a>
+      <a class="nav-link active" href="/pricing">Pricing</a>
+      <a class="nav-link" href="/faq">FAQ</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-pill" onclick="openAuthModal('login')">Log in</button>
+      <button class="nav-cta" onclick="openAuthModal('signup')">Start free →</button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="section-label">Pricing</div>
+    <h1 class="page-title">Simple,<br><em>transparent pricing</em></h1>
+    <p class="page-sub">Start for free with 5 imports. Upgrade when you're ready to scale — no long-term contracts.</p>
+  </div>
+
+  <div class="content">
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+        <div class="pricing-name">Free</div>
+        <div class="pricing-price"><sup>$</sup>0</div>
+        <div class="pricing-per">forever</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> 5 product imports</li>
+          <li><span class="check">✓</span> AI-written descriptions</li>
+          <li><span class="check">✓</span> Automatic image import</li>
+          <li><span class="check">✓</span> Margin calculator</li>
+          <li><span class="check">✓</span> All Amazon marketplaces</li>
+          <li><span class="cross">✕</span> Unlimited imports</li>
+          <li><span class="cross">✕</span> Bulk import</li>
+          <li><span class="cross">✕</span> Analytics dashboard</li>
+          <li><span class="cross">✕</span> Priority support</li>
+        </ul>
+        <a class="pricing-btn ghost" href="/">Get started free</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price"><sup>$</sup>19</div>
+        <div class="pricing-per">/month · billed monthly</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> Unlimited imports</li>
+          <li><span class="check">✓</span> AI-written descriptions</li>
+          <li><span class="check">✓</span> Automatic image import</li>
+          <li><span class="check">✓</span> Margin calculator</li>
+          <li><span class="check">✓</span> All Amazon marketplaces</li>
+          <li><span class="check">✓</span> Priority support</li>
+          <li><span class="cross">✕</span> Bulk import</li>
+          <li><span class="cross">✕</span> Analytics dashboard</li>
+        </ul>
+        <a class="pricing-btn primary" href="/">Get Pro →</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-name">Business</div>
+        <div class="pricing-price"><sup>$</sup>49</div>
+        <div class="pricing-per">/month · billed monthly</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span> Unlimited imports</li>
+          <li><span class="check">✓</span> AI-written descriptions</li>
+          <li><span class="check">✓</span> Automatic image import</li>
+          <li><span class="check">✓</span> Margin calculator</li>
+          <li><span class="check">✓</span> All Amazon marketplaces</li>
+          <li><span class="check">✓</span> Priority support</li>
+          <li><span class="check">✓</span> Bulk import</li>
+          <li><span class="check">✓</span> Analytics dashboard</li>
+        </ul>
+        <a class="pricing-btn primary" href="/">Get Business →</a>
+      </div>
+
+    </div>
+
+    <!-- FAQ TEASER -->
+    <div class="faq-teaser">
+      <div class="faq-teaser-title">Pricing questions</div>
+      <div class="faq-grid">
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">Can I cancel anytime?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg></div>
+          <div class="faq-a">Yes — cancel anytime from your account. You keep access until the end of your billing
+            period. No cancellation fees.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">What happens to my products if I downgrade?<svg class="faq-chevron" width="16" height="16"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg></div>
+          <div class="faq-a">All products already imported into your Shopify store remain live. You just won't be able
+            to import new ones until you upgrade again.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">Is there a free trial for paid plans?<svg class="faq-chevron" width="16" height="16"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg></div>
+          <div class="faq-a">The free plan includes 5 imports so you can test the full product before paying. No time
+            limit on the free plan.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q">Do you charge per import on paid plans?<svg class="faq-chevron" width="16" height="16"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg></div>
+          <div class="faq-a">No. Pro and Business plans include unlimited imports — no per-import charges, no surprises.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-strip">
+      <div class="cta-title">Start importing today</div>
+      <div class="cta-sub">5 free imports. No credit card. Cancel anytime.</div>
+      <div class="cta-actions">
+        <a class="btn-primary" href="/">Get started free →</a>
+        <a class="btn-ghost-link" href="/faq">More questions? See FAQ</a>
+      </div>
     </div>
   </div>
-</footer>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="/" style="text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px;">
+        <div class="logo-mark" style="width:28px;height:28px;border-radius:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" style="width:14px;height:14px;">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </div>
+        <span style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Importr</span>
+      </a>
+      <div class="footer-copy">© 2026 Importr. All rights reserved.</div>
+      <div class="footer-links">
+        <a class="footer-link" href="/how-it-works">How It Works</a>
+        <a class="footer-link" href="/features">Features</a>
+        <a class="footer-link" href="/pricing">Pricing</a>
+        <a class="footer-link" href="/faq">FAQ</a>
+        <a class="footer-link" href="#">Terms</a>
+        <a class="footer-link" href="#">Privacy</a>
+      </div>
+    </div>
+  </footer>
+  <!-- AUTH MODAL -->
+  <div class="overlay" id="authOverlay"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:200;align-items:center;justify-content:center;padding:24px;">
+    <div
+      style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);width:100%;max-width:440px;position:relative;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 32px 80px rgba(0,0,0,0.6);">
+      <button onclick="closeAuthModal()"
+        style="position:absolute;top:16px;right:16px;width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:15px;z-index:10;">✕</button>
+      <div style="padding:36px 32px 0;text-align:center;">
+        <div
+          style="width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#b8acff);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 30px rgba(124,107,255,0.4);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </div>
+        <h2 id="authModalTitle"
+          style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;">
+          Welcome to Importr</h2>
+        <p id="authModalSub"
+          style="font-size:14px;color:var(--text-muted);line-height:1.6;max-width:300px;margin:0 auto;">Sign in with
+          Google, then verify your phone to get started.</p>
+      </div>
+      <div style="padding:28px 32px;">
+        <button onclick="startGoogleSignIn()"
+          style="width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 20px;background:#fff;border:none;border-radius:var(--r-sm);font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:#1a1a2e;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.3);margin-bottom:20px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+          </svg>
+          <span id="googleBtnText">Continue with Google</span>
+        </button>
+        <div id="signupFeatures" style="display:flex;flex-direction:column;gap:8px;">
+          <div
+            style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
+            <span style="color:var(--green);font-weight:700;">✓</span> 5 free imports included</div>
+          <div
+            style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
+            <span style="color:var(--green);font-weight:700;">✓</span> One account per phone number</div>
+          <div
+            style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
+            <span style="color:var(--green);font-weight:700;">✓</span> No credit card required</div>
+        </div>
+        <div id="loginNote"
+          style="display:none;text-align:center;font-size:13px;color:var(--text-muted);padding:8px 0;">Already have an
+          account? We'll recognize you instantly.</div>
+        <div style="margin-top:16px;text-align:center;">
+          <span id="authSwitchText" style="font-size:13px;color:var(--text-muted);"></span>
+          <button id="authSwitchBtn" onclick="toggleAuthMode()"
+            style="background:none;border:none;color:var(--accent2);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-left:4px;"></button>
+        </div>
+      </div>
+      <div style="padding:0 32px 24px;font-size:12px;color:var(--text-muted);text-align:center;">By continuing you agree
+        to our <a href="#" style="color:var(--accent2);">Terms</a> and <a href="#" style="color:var(--accent2);">Privacy
+          Policy</a>.</div>
+      <div id="recaptcha-container"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"
+    style="position:fixed;bottom:28px;right:28px;z-index:999;display:flex;align-items:center;gap:12px;padding:13px 20px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-weight:500;box-shadow:0 12px 40px rgba(0,0,0,0.5);transform:translateY(80px);opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;">
+    <span id="toastIcon">✓</span>
+    <span id="toastMsg"></span>
+  </div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+    const app = initializeApp({ apiKey: "AIzaSyD-y6vl2ahHu_gEx0XhiDgsQ6BOye6Hge0", authDomain: "importr-b4f68.firebaseapp.com", projectId: "importr-b4f68", storageBucket: "importr-b4f68.firebasestorage.app", messagingSenderId: "971241906166", appId: "1:971241906166:web:ccd8a2cedc0fad6f6bf1d7" });
+    const auth = getAuth(app);
+
+    window.startGoogleSignIn = async function () {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const token = await user.getIdToken();
+        sessionStorage.setItem('importrUser', JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, phone: user.phoneNumber, token }));
+        // Redirect to homepage where the full app flow continues
+        window.location.href = '/';
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          showToast('error', '!', 'Sign in failed. Try again.');
+        }
+      }
+    };
+  </script>
+
+  <script>
+    let authMode = 'signup';
+    window.authMode = authMode;
+
+    function openAuthModal(mode) {
+      authMode = mode || 'signup';
+      window.authMode = authMode;
+      const overlay = document.getElementById('authOverlay');
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      updateAuthModeUI();
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      window.authMode = authMode;
+      updateAuthModeUI();
+    }
+
+    function updateAuthModeUI() {
+      const title = document.getElementById('authModalTitle');
+      const sub = document.getElementById('authModalSub');
+      const btnText = document.getElementById('googleBtnText');
+      const features = document.getElementById('signupFeatures');
+      const loginNote = document.getElementById('loginNote');
+      const switchText = document.getElementById('authSwitchText');
+      const switchBtn = document.getElementById('authSwitchBtn');
+      if (authMode === 'login') {
+        if (title) title.textContent = 'Welcome back';
+        if (sub) sub.textContent = 'Sign in with your Google account to continue.';
+        if (btnText) btnText.textContent = 'Log in with Google';
+        if (features) features.style.display = 'none';
+        if (loginNote) loginNote.style.display = 'block';
+        if (switchText) switchText.textContent = "Don't have an account?";
+        if (switchBtn) switchBtn.textContent = 'Sign up free';
+      } else {
+        if (title) title.textContent = 'Create your account';
+        if (sub) sub.textContent = 'Sign up with Google, then verify your phone number.';
+        if (btnText) btnText.textContent = 'Continue with Google';
+        if (features) features.style.display = 'flex';
+        if (loginNote) loginNote.style.display = 'none';
+        if (switchText) switchText.textContent = 'Already have an account?';
+        if (switchBtn) switchBtn.textContent = 'Log in';
+      }
+    }
+
+    document.getElementById('authOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('authOverlay')) closeAuthModal();
+    });
+
+    let toastTimer;
+    function showToast(type, icon, msg) {
+      const t = document.getElementById('toast');
+      t.className = '';
+      t.style.borderColor = type === 'error' ? 'rgba(255,77,109,0.3)' : 'rgba(0,229,160,0.3)';
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      t.style.transform = 'translateY(0)';
+      t.style.opacity = '1';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.transform = 'translateY(80px)'; t.style.opacity = '0'; }, 3500);
+    }
+  </script>
 </body>
+
 </html>
