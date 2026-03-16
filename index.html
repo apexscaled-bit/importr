@@ -2656,7 +2656,67 @@
       z-index: 0;
       background: transparent;
       border: none;
-      outline: none;
+    }
+
+    .float-side.left {
+      left: 0;
+    }
+
+    .float-side.right {
+      right: 0;
+    }
+
+    .float-card {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      animation: floatUp 16s linear infinite;
+    }
+
+    .float-card .fc-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .float-card .fc-badge {
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+
+      8% {
+        opacity: 0.8;
+      }
+
+      85% {
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translateY(-200px);
+        opacity: 0;
+      }
     }
 
     .float-card:nth-child(1) {
@@ -2665,12 +2725,12 @@
     }
 
     .float-card:nth-child(2) {
-      animation-delay: -10s;
+      animation-delay: -6s;
       left: 180px;
     }
 
     .float-card:nth-child(3) {
-      animation-delay: -6s;
+      animation-delay: -10s;
       left: 60px;
     }
 
@@ -2703,77 +2763,11 @@
       animation-delay: -16s;
     }
 
-    @keyframes floatUp {
-      0% {
-        opacity: 0;
-        transform: translateY(100px);
-      }
-
-      10% {
-        opacity: 0.7;
-      }
-
-      80% {
-        opacity: 0.7;
-      }
-
-      100% {
-        opacity: 0;
-        transform: translateY(-600px);
-      }
-    }
-
-
-    .float-card:nth-child(1) {
-      animation-delay: -3s;
-      left: 16px;
-    }
-
-    .float-card:nth-child(2) {
-      animation-delay: -7s;
-      left: 180px;
-    }
-
-    .float-card:nth-child(3) {
-      animation-delay: -11s;
-      left: 60px;
-    }
-
-    .float-card:nth-child(4) {
-      animation-delay: -5s;
-      left: 240px;
-    }
-
-    .float-side.right .float-card:nth-child(1) {
-      left: auto;
-      right: 16px;
-      animation-delay: -9s;
-    }
-
-    .float-side.right .float-card:nth-child(2) {
-      left: auto;
-      right: 180px;
-      animation-delay: -2s;
-    }
-
-    .float-side.right .float-card:nth-child(3) {
-      left: auto;
-      right: 60px;
-      animation-delay: -13s;
-    }
-
-    .float-side.right .float-card:nth-child(4) {
-      left: auto;
-      right: 240px;
-      animation-delay: -6s;
-    }
-
-    /* Animated corner glow lines */
     .corner-line {
       position: fixed;
       pointer-events: none;
-      z-index: 0;
       opacity: 0.15;
+      animation: cornerPulse 4s ease-in-out infinite;
     }
 
     .corner-line.tl {
@@ -2784,7 +2778,6 @@
       border-right: 1px solid var(--accent);
       border-bottom: 1px solid var(--accent);
       border-radius: 0 0 var(--r-lg) 0;
-      animation: cornerPulse 4s ease-in-out infinite;
     }
 
     .corner-line.br {
@@ -2795,18 +2788,18 @@
       border-left: 1px solid var(--accent);
       border-top: 1px solid var(--accent);
       border-radius: var(--r-lg) 0 0 0;
-      animation: cornerPulse 4s ease-in-out infinite 2s;
+      animation-delay: 2s;
     }
 
     @keyframes cornerPulse {
 
       0%,
       100% {
-        opacity: 0.1;
+        opacity: 0.1
       }
 
       50% {
-        opacity: 0.25;
+        opacity: 0.25
       }
     }
 
