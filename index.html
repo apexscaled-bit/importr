@@ -2611,10 +2611,40 @@
       color: var(--accent);
       background: var(--accent-dim);
     }
-    .page-header { position: relative; z-index: 1; text-align: center; padding: 80px 32px 64px; max-width: 1100px; margin: 0 auto; }
-    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 5vw, 60px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
-    .page-title em { font-style: italic; background: linear-gradient(135deg, var(--accent2), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .page-sub { font-size: 17px; color: var(--text-muted); line-height: 1.65; max-width: 520px; margin: 0 auto; }
+
+    .page-header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 80px 32px 64px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .page-title em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--accent2), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 520px;
+      margin: 0 auto;
+    }
   </style>
 </head>
 
@@ -3347,6 +3377,20 @@
       if (user) {
         const token = await user.getIdToken();
         window._fbUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, phone: user.phoneNumber, token };
+        // Always update nav with Google info
+        const authBtns = document.getElementById('authBtns');
+        const userMenu = document.getElementById('userMenu');
+        const navName = document.getElementById('navName');
+        const navAvatarWrap = document.getElementById('navAvatarWrap');
+        if (authBtns) authBtns.style.display = 'none';
+        if (userMenu) userMenu.style.display = 'flex';
+        if (navName) navName.textContent = user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Account';
+        if (navAvatarWrap) {
+          navAvatarWrap.innerHTML = user.photoURL
+            ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
+            : (user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?');
+        }
+        if (user.phoneNumber) onFullyAuthenticated(window._fbUser);
         if (user.phoneNumber) onFullyAuthenticated(window._fbUser);
       }
     });
