@@ -2084,7 +2084,6 @@
       showAuthStep('loading', 'Sending verification code...');
 
       try {
-        // Check 2-account limit
         const check = await fetch('/api/check-phone', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2097,37 +2096,59 @@
           return;
         }
 
-        // Skip reCAPTCHA for test numbers, use it for real ones
-        const TEST_PHONES = ['+14084392507'];
-        let appVerifier = null;
-
-        if (!TEST_PHONES.includes(phone)) {
-          if (window._recaptcha) {
-            try { window._recaptcha.clear(); } catch (e) { }
-          }
-          window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            size: 'invisible',
-            callback: () => { }
-          });
-          await window._recaptcha.render();
-          appVerifier = window._recaptcha;
+        // Always reset recaptcha before each attempt
+        if (window._recaptcha) {
+          try { window._recaptcha.clear(); } catch (e) { }
+          window._recaptcha = null;
         }
+        window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => { }
+        });
+        await window._recaptcha.render();
 
-        if (!window._recaptcha) {
-          window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            size: 'invisible',
-            callback: () => { }
-          });
-          await window._recaptcha.render();
-        }
         confirmationResult = await signInWithPhoneNumber(auth, phone, window._recaptcha);
         document.getElementById('otpSentTo').textContent = phone;
         showAuthStep('otp');
       } catch (err) {
         window._recaptcha = null;
         showAuthStep('phone');
-        console.error('Firebase phone error:', err.code, err.message);
+        showFieldError('phoneError', getFirebaseError(err.code) || 'Failed to send code. Try again.');
+        console.error('SMS error:', err.code, err.message);
       }
+    };
+
+    // Skip reCAPTCHA for test numbers, use it for real ones
+    const TEST_PHONES = ['+14084392507'];
+    let appVerifier = null;
+
+    if (!TEST_PHONES.includes(phone)) {
+      if (window._recaptcha) {
+        try { window._recaptcha.clear(); } catch (e) { }
+      }
+      window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => { }
+      });
+      await window._recaptcha.render();
+      appVerifier = window._recaptcha;
+    }
+
+    if (!window._recaptcha) {
+      window._recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => { }
+      });
+      await window._recaptcha.render();
+    }
+    confirmationResult = await signInWithPhoneNumber(auth, phone, window._recaptcha);
+    document.getElementById('otpSentTo').textContent = phone;
+    showAuthStep('otp');
+      } catch (err) {
+      window._recaptcha = null;
+      showAuthStep('phone');
+      console.error('Firebase phone error:', err.code, err.message);
+    }
     };
 
     // Step 3: Verify OTP
