@@ -3376,7 +3376,15 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const token = await user.getIdToken();
-        window._fbUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, phone: user.phoneNumber, token };
+        const googleProvider = user.providerData?.find(p => p.providerId === 'google.com');
+        window._fbUser = {
+          uid: user.uid,
+          name: user.displayName || googleProvider?.displayName || user.email?.split('@')[0] || 'User',
+          email: user.email || googleProvider?.email,
+          picture: user.photoURL || googleProvider?.photoURL,
+          phone: user.phoneNumber,
+          token
+        };
         // Always update nav with Google info
         const authBtns = document.getElementById('authBtns');
         const userMenu = document.getElementById('userMenu');
