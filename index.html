@@ -3596,11 +3596,14 @@
         if (urlInput) urlInput.value = pending;
         sessionStorage.removeItem('pendingHeroUrl');
       }
-      
+
       if (shop && token) {
         document.getElementById('installGate').style.display = 'none';
         document.getElementById('appUI').style.display = 'block';
         document.getElementById('mobileImportBar').style.display = 'block';
+        // Hide hero section once connected — it's no longer relevant
+        const heroSection = document.getElementById('hero');
+        if (heroSection) heroSection.style.display = 'none';
         checkUsage();
       }
     }
