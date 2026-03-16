@@ -2611,6 +2611,10 @@
       color: var(--accent);
       background: var(--accent-dim);
     }
+    .page-header { position: relative; z-index: 1; text-align: center; padding: 80px 32px 64px; max-width: 1100px; margin: 0 auto; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 5vw, 60px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .page-title em { font-style: italic; background: linear-gradient(135deg, var(--accent2), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .page-sub { font-size: 17px; color: var(--text-muted); line-height: 1.65; max-width: 520px; margin: 0 auto; }
   </style>
 </head>
 
@@ -2786,75 +2790,6 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- HERO URL BAR -->
-  <div class="hero-url-bar" style="margin-top:32px;animation:fadeUp 0.6s 0.25s ease both;">
-    <div class="hero-url-inner">
-      <input class="hero-url-input" id="heroUrlInput" type="text" placeholder="Paste any Amazon product link..."
-        onkeydown="if(event.key==='Enter') heroBarAction()" />
-      <button class="hero-url-btn" onclick="heroBarAction()">
-        Import it free
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14" />
-          <path d="m12 5 7 7-7 7" />
-        </svg>
-      </button>
-    </div>
-    <div class="hero-url-chips">
-      <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B08N5WRWNW')">🎧 Echo Dot</span>
-      <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B07ZPKBL9V')">⌚ Fitbit</span>
-      <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B08BHXG144')">💡 Smart Bulb</span>
-      <span class="hero-url-chip" onclick="setHeroUrl('https://www.amazon.com/dp/B09G9HD6PD')">📱 Phone Stand</span>
-    </div>
-  </div>
-
-  <!-- GATE CARD (connect store) -->
-  <!-- GATE (hidden until logged in) -->
-  <div id="installGate"
-    style="display:none; max-width:520px; margin:0 auto; padding:0 32px 60px; position:relative; z-index:1;">
-    <div class="gate-card">
-      <div class="gate-card-inner">
-        <div class="gate-header">
-          <div class="gate-icon">🔌</div>
-          <div class="gate-title" id="gateTitle">Connect your Shopify store</div>
-          <div class="gate-sub" id="gateSub">One last step — enter your store name to start importing products.
-          </div>
-        </div>
-        <div class="gate-body">
-          <div id="gateUserStrip"
-            style="display:none; align-items:center; gap:10px; padding:12px 14px; background:var(--green-dim); border:1px solid rgba(0,229,160,0.2); border-radius:var(--r-sm); margin-bottom:16px;">
-            <div id="gateAvatarWrap"
-              style="width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent2);font-size:13px;">
-            </div>
-            <div style="flex:1;">
-              <div id="gateUserName" style="font-size:13px;font-weight:600;color:var(--green);"></div>
-              <div id="gateUserEmail" style="font-size:12px;color:var(--text-muted);"></div>
-            </div>
-            <div id="gateImportBadge"
-              style="padding:3px 10px;background:var(--accent-dim);border:1px solid rgba(124,107,255,0.25);border-radius:100px;font-size:11px;font-weight:700;color:var(--accent2);">
-            </div>
-          </div>
-          <div class="shop-row">
-            <input class="shop-input" id="shopInput" type="text" placeholder="your-store" />
-            <div class="shop-suffix">.myshopify.com</div>
-          </div>
-          <button class="btn-connect" onclick="installApp()">Connect Shopify Store →</button>
-          <div class="gate-note">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0110 0v4" />
-            </svg>
-            Redirects to Shopify to approve read/write access
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   </section>
 
   <div class="section-divider"></div>
