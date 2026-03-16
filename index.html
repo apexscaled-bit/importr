@@ -3384,13 +3384,23 @@
         const navAvatarWrap = document.getElementById('navAvatarWrap');
         if (authBtns) authBtns.style.display = 'none';
         if (userMenu) userMenu.style.display = 'flex';
+        // Update gate card too
+        const gateUserStrip = document.getElementById('gateUserStrip');
+        const gateAvatarWrap = document.getElementById('gateAvatarWrap');
+        const gateUserName = document.getElementById('gateUserName');
+        const gateUserEmail = document.getElementById('gateUserEmail');
+        const googleSignInSection = document.getElementById('googleSignInSection');
+        if (gateUserStrip) gateUserStrip.style.display = 'flex';
+        if (googleSignInSection) googleSignInSection.style.display = 'none';
+        if (gateAvatarWrap) gateAvatarWrap.innerHTML = user.photoURL ? `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : (user.displayName?.[0]?.toUpperCase() || '?');
+        if (gateUserName) gateUserName.textContent = user.displayName || 'Signed in';
+        if (gateUserEmail) gateUserEmail.textContent = user.email || '';
         if (navName) navName.textContent = user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Account';
         if (navAvatarWrap) {
           navAvatarWrap.innerHTML = user.photoURL
             ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
             : (user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?');
         }
-        if (user.phoneNumber) onFullyAuthenticated(window._fbUser);
         if (user.phoneNumber) onFullyAuthenticated(window._fbUser);
       }
     });
