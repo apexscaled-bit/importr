@@ -3516,9 +3516,55 @@
           <div class="auth-field">
             <label class="auth-label">Phone Number</label>
             <div class="auth-phone-row">
-              <div class="auth-country-code">+1</div>
-              <input id="phoneInput" class="auth-input" type="tel" placeholder="(555) 000-0000" maxlength="14"
-                oninput="formatPhone(this)" onkeydown="if(event.key==='Enter') sendSmsCode()" />
+              <select id="countryCode"
+                style="padding:13px 10px;background:var(--surface2);border:none;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Syne',sans-serif;font-size:13px;outline:none;cursor:pointer;min-width:80px;">
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+1">🇨🇦 +1</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+39">🇮🇹 +39</option>
+                <option value="+31">🇳🇱 +31</option>
+                <option value="+46">🇸🇪 +46</option>
+                <option value="+47">🇳🇴 +47</option>
+                <option value="+45">🇩🇰 +45</option>
+                <option value="+358">🇫🇮 +358</option>
+                <option value="+41">🇨🇭 +41</option>
+                <option value="+43">🇦🇹 +43</option>
+                <option value="+32">🇧🇪 +32</option>
+                <option value="+351">🇵🇹 +351</option>
+                <option value="+353">🇮🇪 +353</option>
+                <option value="+64">🇳🇿 +64</option>
+                <option value="+27">🇿🇦 +27</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+81">🇯🇵 +81</option>
+                <option value="+82">🇰🇷 +82</option>
+                <option value="+86">🇨🇳 +86</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+60">🇲🇾 +60</option>
+                <option value="+63">🇵🇭 +63</option>
+                <option value="+66">🇹🇭 +66</option>
+                <option value="+62">🇮🇩 +62</option>
+                <option value="+55">🇧🇷 +55</option>
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+20">🇪🇬 +20</option>
+                <option value="+234">🇳🇬 +234</option>
+                <option value="+254">🇰🇪 +254</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+972">🇮🇱 +972</option>
+                <option value="+90">🇹🇷 +90</option>
+                <option value="+7">🇷🇺 +7</option>
+                <option value="+380">🇺🇦 +380</option>
+                <option value="+48">🇵🇱 +48</option>
+              </select>
+              <input id="phoneInput" class="auth-input" type="tel" placeholder="Phone number" maxlength="15"
+                onkeydown="if(event.key==='Enter') sendSmsCode()" />
             </div>
             <div class="auth-error" id="phoneError" style="display:none;"></div>
             <div class="auth-hint">One account per phone number.</div>
@@ -3660,7 +3706,8 @@
     window.sendSmsCode = async function () {
       const raw = document.getElementById('phoneInput').value.trim();
       if (!raw) { showFieldError('phoneError', 'Enter your phone number'); return; }
-      const phone = '+1' + raw.replace(/\D/g, '');
+      const countryCode = document.getElementById('countryCode')?.value || '+1';
+      const phone = countryCode + raw.replace(/\D/g, '');
       showAuthStep('loading', 'Sending verification code...');
       try {
         const check = await fetch('/api/check-phone', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, uid: googleUserTemp?.uid, email: googleUserTemp?.email, action: 'check' }) });
